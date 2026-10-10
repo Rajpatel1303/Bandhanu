@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-crimson: #9B111E;
+    --brand-gold: #D4AF37;
+    --brand-cream: #FFFDF9;
+    --brand-sand: #F7F3E9;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  body {
+    background-color: #FFFDF9;
+    color: #1F2937;
+    overflow-x: hidden;
+  }
+
+  /* Custom luxury scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #C85A32;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9B111E;
+  }
+}
+
+/* Hide scrollbars for clean horizontal swipe containers on mobile & desktop */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Glassmorphism and specialized decorative effects */
+.glass-panel {
+  background: rgba(255, 253, 249, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.glass-panel-dark {
+  background: rgba(24, 24, 27, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.gold-border-glow {
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+/* Authentic Bandhani dot pattern background helper */
+.bandhani-pattern-subtle {
+  background-color: #FFFDF9;
+  background-image: radial-gradient(rgba(155, 17, 30, 0.08) 1.5px, transparent 1.5px), radial-gradient(rgba(212, 175, 55, 0.08) 1.5px, #FFFDF9 1.5px);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+
+.bandhani-pattern-dark {
+  background-color: #121214;
+  background-image: radial-gradient(rgba(212, 175, 55, 0.12) 1.5px, transparent 1.5px), radial-gradient(rgba(195, 90, 50, 0.1) 1.5px, #121214 1.5px);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+
+/* Shimmer effect for badges and buttons */
+@keyframes goldShine {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(200%) rotate(45deg); }
+}
+
+.animate-gold-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-gold-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transform: rotate(45deg);
+  animation: goldShine 4s infinite;
+}
