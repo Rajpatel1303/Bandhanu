@@ -9,27 +9,34 @@ export default {
     extend: {
       colors: {
         heritage: {
-          crimson: '#9B111E',
-          ruby: '#800020',
-          terracotta: '#C85A32',
+          maroon: '#4A121A',
+          maroonDark: '#380D13',
+          maroonLight: '#5C1520',
+          crimson: '#4A121A', // Aligned with the deep maroon brand
+          ruby: '#380D13',
+          terracotta: '#A6432D',
           marigold: '#F4A228',
-          saffron: '#FF9933',
-          turmeric: '#E6A117',
-          indigo: '#1F2942',
+          saffron: '#D97706',
+          turmeric: '#CA8A04',
+          indigo: '#1E2B45',
           peacock: '#0D5C75',
           emerald: '#1A5336',
-          sand: '#F7F3E9',
-          cream: '#FFFDF9',
+          sand: '#F5EFE6',
+          sandBorder: '#E2D7C7',
+          sandLight: '#FAF6F0',
+          cream: '#FBF8F3',
           silk: '#F5EFE6',
-          gold: '#D4AF37',
-          antiqueGold: '#B38B2D',
-          charcoal: '#18181B',
-          darkSurface: '#121214',
-          darkCard: '#1E1E24'
+          gold: '#C29D59',
+          antiqueGold: '#9E7B3B',
+          charcoal: '#241E1C',
+          muted: '#6E6259',
+          darkSurface: '#191514',
+          darkCard: '#241F1E'
         }
       },
       fontFamily: {
-        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        serif: ['"Cormorant Garamond"', '"Playfair Display"', 'Georgia', 'serif'],
+        display: ['"Playfair Display"', '"Cormorant Garamond"', 'Georgia', 'serif'],
         sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace']
       },
@@ -69,10 +76,11 @@ export default {
         }
       },
       boxShadow: {
-        'luxury': '0 20px 40px -15px rgba(0, 0, 0, 0.08), 0 0 1px 1px rgba(212, 175, 55, 0.2)',
-        'luxury-dark': '0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 1px 1px rgba(212, 175, 55, 0.3)',
-        'gold-glow': '0 0 25px rgba(212, 175, 55, 0.25)',
-        'crimson-glow': '0 0 25px rgba(155, 17, 30, 0.25)',
+        'subtle': '0 2px 10px rgba(0, 0, 0, 0.04)',
+        'card': '0 4px 20px rgba(74, 18, 26, 0.05)',
+        'luxury': '0 20px 40px -15px rgba(74, 18, 26, 0.08)',
+        'luxury-dark': '0 20px 40px -15px rgba(0, 0, 0, 0.6)',
+        'maroon-glow': '0 0 25px rgba(74, 18, 26, 0.25)',
       }
     },
   },

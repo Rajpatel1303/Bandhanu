@@ -1,199 +1,139 @@
 import React from 'react';
 import { useStore } from '../context/StoreContext';
-import { openWhatsAppDirect } from '../utils/whatsapp';
-import {
-  Heart,
-  ShoppingBag,
-  MessageCircle,
-  Trash2,
-  ArrowRight,
-  Sparkles,
-  Share2,
-  CheckCircle2
-} from 'lucide-react';
+import { Heart, Trash2, ArrowRight } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
-import confetti from 'canvas-confetti';
 
 export const WishlistPage: React.FC = () => {
-  const { wishlist, products, toggleWishlist, navigateToProduct, setCurrentPage, profile } = useStore();
+  const {
+    wishlist,
+    products,
+    toggleWishlist,
+    setSelectedProductId,
+    setCurrentPage,
+    addToCart
+  } = useStore();
 
   const savedProducts = products.filter((p) => wishlist.includes(p.id));
-  const totalValue = savedProducts.reduce((acc, p) => acc + p.price, 0);
-  const cleanPhone = profile.whatsappNumber.replace(/[^0-9]/g, '');
 
-  const handleBulkEnquire = () => {
-    confetti({
-      particleCount: 50,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
-
-    const itemsList = savedProducts
-      .map((p, idx) => `${idx + 1}. ${p.title} - ${formatCurrency(p.price)}`)
-      .join('\n');
-
-    const message = `Hello Bandhanu Concierge! 👋
-
-I have curated my personalized Bandhanu Wishlist (${savedProducts.length} pieces) and would like to check availability and place an order:
-
-${itemsList}
-
-✦ Total Estimated Value: ${formatCurrency(totalValue)}
-
-Please confirm which of these pieces are ready for immediate dispatch or bespoke bridal order. Thank you!`;
-
-    openWhatsAppDirect(profile.whatsappNumber, message);
+  const handleProductClick = (productId: string) => {
+    setSelectedProductId(productId);
+    setCurrentPage('product');
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const handleSingleEnquire = (product: typeof products[0]) => {
-    const text = `Hello Bandhanu! I am interested in ordering this piece from my wishlist:
-✦ ${product.title}
-✦ Price: ${formatCurrency(product.price)}
-✦ Craft: ${product.craftTechnique}
-Please provide availability and dispatch timeline.`;
-    openWhatsAppDirect(profile.whatsappNumber, text);
+  const handleContinueShopping = () => {
+    setCurrentPage('catalogue');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-heritage-cream dark:bg-heritage-darkSurface pb-24">
-      {/* Header */}
-      <section className="relative py-14 sm:py-20 bg-gradient-to-b from-heritage-sand/40 via-heritage-cream to-transparent dark:from-heritage-darkCard/60 dark:via-heritage-darkSurface border-b border-heritage-gold/20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-500/10 text-heritage-crimson dark:text-rose-400 text-xs font-bold uppercase tracking-wider mb-3">
-            <Heart className="w-3.5 h-3.5 fill-current" />
-            <span>Saved Heirlooms</span>
+    <div className="bg-[#FBF8F3] min-h-screen pb-20 sm:pb-28 animate-fade-in">
+      {/* 1. Header with Subtle Traditional Motif Watermark matching Image 2 */}
+      <section className="relative py-12 sm:py-16 bg-[#F5EFE6] border-b border-[#E2D7C7] overflow-hidden">
+        {/* Subtle Mandala / Motif Background Accent */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+          <svg className="w-96 h-96 text-[#4A121A]" viewBox="0 0 100 100" fill="currentColor">
+            <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="1" fill="none" />
+            <circle cx="50" cy="50" r="35" stroke="currentColor" strokeWidth="0.8" fill="none" />
+            <circle cx="50" cy="50" r="25" stroke="currentColor" strokeWidth="0.6" fill="none" />
+            <path d="M50 5 L55 35 L85 20 L65 45 L95 50 L65 55 L85 80 L55 65 L50 95 L45 65 L15 80 L35 55 L5 50 L35 45 L15 20 L45 35 Z" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          </svg>
+        </div>
+
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-2">
+          <div className="flex items-center justify-center gap-2 text-xl sm:text-2xl font-serif text-[#241E1C]">
+            <Heart className="w-6 h-6 stroke-[1.8] text-[#4A121A]" />
+            <h1 className="font-serif font-bold text-2xl sm:text-3xl lg:text-4xl text-[#241E1C]">
+              My Wishlist
+            </h1>
           </div>
-
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-heritage-charcoal dark:text-white">
-            My Curated Trousseau
-          </h1>
-
-          <p className="mt-2 text-xs sm:text-sm text-heritage-charcoal/70 dark:text-gray-300 max-w-xl mx-auto">
-            {savedProducts.length > 0
-              ? `You have saved ${savedProducts.length} handcrafted masterpiece${savedProducts.length > 1 ? 's' : ''}. Send your full selection directly to our WhatsApp concierge.`
-              : 'Keep track of the exquisite Bandhani pieces you adore while browsing our collection.'}
+          <p className="text-xs sm:text-sm text-[#6E6259]">
+            Your favourite pieces, saved for later
           </p>
-
-          {savedProducts.length > 0 && (
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-              <div className="px-4 py-2 rounded-2xl bg-white dark:bg-heritage-darkCard border border-heritage-gold/30 shadow-sm text-xs sm:text-sm font-semibold">
-                <span className="text-heritage-charcoal/60 dark:text-gray-400">Total Selection Value: </span>
-                <span className="font-serif font-bold text-heritage-crimson dark:text-heritage-gold text-base">
-                  {formatCurrency(totalValue)}
-                </span>
-              </div>
-
-              <button
-                onClick={handleBulkEnquire}
-                className="px-6 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-emerald-600/25 transition-transform active:scale-95 cursor-pointer"
-              >
-                <MessageCircle className="w-4 h-4 fill-white" />
-                <span>Enquire Entire Wishlist on WhatsApp ({savedProducts.length})</span>
-              </button>
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Wishlist Grid or Empty State */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+      {/* 2. Wishlist Rows List matching Image 2 */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-14">
         {savedProducts.length === 0 ? (
-          <div className="max-w-md mx-auto text-center py-16 px-4">
-            <div className="w-20 h-20 mx-auto rounded-full bg-rose-500/10 text-heritage-crimson flex items-center justify-center mb-6">
-              <Heart className="w-10 h-10 stroke-[1.5]" />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-serif font-bold text-heritage-charcoal dark:text-white">
-              Your Wishlist is Empty
-            </h2>
-            <p className="mt-2 text-xs sm:text-sm text-heritage-charcoal/70 dark:text-gray-400">
-              Browse our heritage collection of sarees, dupattas, stoles, garments, and running fabrics to build your bespoke trousseau.
+          <div className="text-center py-16 space-y-4 bg-white/60 border border-[#E2D7C7] p-8">
+            <Heart className="w-12 h-12 stroke-1 text-[#6E6259] mx-auto opacity-50" />
+            <h3 className="font-serif text-xl text-[#241E1C]">Your Wishlist is Empty</h3>
+            <p className="text-xs text-[#6E6259] max-w-md mx-auto">
+              Save your cherished pieces while browsing our handcrafted Bandhani collection.
             </p>
-            <div className="mt-6">
-              <button
-                onClick={() => setCurrentPage('catalogue')}
-                className="px-6 py-3 rounded-full bg-heritage-crimson hover:bg-heritage-crimson/90 text-white font-bold text-xs sm:text-sm shadow-lg shadow-heritage-crimson/25 transition-transform active:scale-95 inline-flex items-center gap-2 cursor-pointer"
-              >
-                <ShoppingBag className="w-4 h-4" />
-                <span>Discover Masterpieces</span>
-              </button>
-            </div>
+            <button
+              onClick={handleContinueShopping}
+              className="mt-2 inline-flex items-center gap-2 px-6 py-3 bg-[#4A121A] text-white text-xs font-semibold tracking-wider uppercase hover:bg-[#380D13] transition-colors"
+            >
+              <span>Explore Collection</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {savedProducts.map((product) => {
-              const primaryImg = product.images?.[0] || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=900&q=85';
-              return (
-                <div
-                  key={product.id}
-                  className="group rounded-2xl sm:rounded-3xl bg-white dark:bg-heritage-darkCard border border-heritage-gold/25 hover:border-heritage-gold shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden"
-                >
-                  {/* Image Container with full-garment aspect */}
+          <div className="space-y-4">
+            {savedProducts.map((product) => (
+              <div
+                key={product.id}
+                className="bg-white border border-[#E2D7C7] p-4 sm:p-5 flex items-center justify-between gap-4 transition-all hover:shadow-sm"
+              >
+                {/* Left: Thumbnail & Title + Price */}
+                <div className="flex items-center gap-4 sm:gap-6 min-w-0">
                   <div
-                    onClick={() => navigateToProduct(product.id)}
-                    className="relative w-full aspect-[3/4] overflow-hidden bg-heritage-sand/30 dark:bg-black/30 cursor-pointer"
+                    onClick={() => handleProductClick(product.id)}
+                    className="w-16 h-20 sm:w-20 sm:h-24 bg-[#F5EFE6] border border-[#E2D7C7]/50 overflow-hidden shrink-0 cursor-pointer"
                   >
                     <img
-                      src={primaryImg}
+                      src={product.images[0]}
                       alt={product.title}
-                      className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300"
                     />
-
-                    {/* Category Tag */}
-                    <div className="absolute top-2.5 left-2.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-heritage-gold">
-                      {product.category}
-                    </div>
-
-                    {/* Remove Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleWishlist(product.id);
-                      }}
-                      title="Remove from wishlist"
-                      className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 dark:bg-heritage-darkSurface/90 hover:bg-rose-50 text-heritage-crimson flex items-center justify-center shadow-md transition-transform active:scale-90"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
 
-                  {/* Body Content */}
-                  <div className="p-3.5 sm:p-4 flex flex-col flex-1 justify-between">
-                    <div>
-                      <div className="text-[11px] text-heritage-crimson dark:text-heritage-gold font-semibold truncate">
-                        {product.craftTechnique}
-                      </div>
-                      <h3
-                        onClick={() => navigateToProduct(product.id)}
-                        className="font-serif font-bold text-xs sm:text-sm text-heritage-charcoal dark:text-white line-clamp-1 hover:text-heritage-crimson cursor-pointer mt-0.5"
-                      >
-                        {product.title}
-                      </h3>
-                      <div className="mt-1 font-serif font-bold text-sm sm:text-base text-heritage-crimson dark:text-heritage-gold">
-                        {formatCurrency(product.price)}
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="mt-3 pt-3 border-t border-heritage-gold/20 flex flex-col sm:flex-row gap-2">
-                      <button
-                        onClick={() => navigateToProduct(product.id)}
-                        className="flex-1 py-1.5 px-2 rounded-xl border border-heritage-gold/30 hover:border-heritage-gold text-[11px] font-semibold text-heritage-charcoal dark:text-white text-center transition-colors"
-                      >
-                        View Piece
-                      </button>
-                      <button
-                        onClick={() => handleSingleEnquire(product)}
-                        className="py-1.5 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center justify-center gap-1 transition-all"
-                      >
-                        <MessageCircle className="w-3.5 h-3.5 fill-white" />
-                        <span className="sm:hidden">Enquire</span>
-                        <span className="hidden sm:inline">WhatsApp</span>
-                      </button>
-                    </div>
+                  <div className="min-w-0">
+                    <h3
+                      onClick={() => handleProductClick(product.id)}
+                      className="font-serif font-bold text-sm sm:text-base text-[#241E1C] truncate hover:text-[#4A121A] cursor-pointer"
+                    >
+                      {product.title}
+                    </h3>
+                    <p className="font-serif font-semibold text-xs sm:text-sm text-[#241E1C] mt-1">
+                      {formatCurrency(product.price)}
+                    </p>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* Right: Solid Maroon Add to Cart Button + Trash Icon */}
+                <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+                  <button
+                    onClick={() => addToCart(product, 1)}
+                    className="py-2.5 px-4 sm:py-3 sm:px-6 bg-[#4A121A] hover:bg-[#380D13] text-white text-xs font-medium tracking-[0.1em] uppercase transition-all duration-300 shadow-sm flex items-center gap-1.5 cursor-pointer group"
+                  >
+                    <span>Add to Cart</span>
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                  </button>
+
+                  <button
+                    onClick={() => toggleWishlist(product.id)}
+                    className="p-2 text-gray-400 hover:text-rose-600 transition-colors"
+                    title="Remove item"
+                    aria-label="Remove from wishlist"
+                  >
+                    <Trash2 className="w-4.5 h-4.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {/* Bottom Link matching Image 2 */}
+            <div className="pt-6 text-left">
+              <button
+                onClick={handleContinueShopping}
+                className="text-xs sm:text-sm font-medium text-[#241E1C] hover:text-[#4A121A] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>Continue Shopping →</span>
+              </button>
+            </div>
           </div>
         )}
       </div>

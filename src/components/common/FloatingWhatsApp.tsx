@@ -36,7 +36,7 @@ export const FloatingWhatsApp: React.FC = () => {
               </div>
               <div className="text-[10px] text-emerald-600 flex items-center gap-1 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live Jamnagar Weavers Studio
+                Live Bhadli, Kutch Studio
               </div>
             </div>
           </div>

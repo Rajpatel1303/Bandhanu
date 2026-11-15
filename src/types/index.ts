@@ -88,9 +88,15 @@ export interface EnquiryLog {
   status: 'new' | 'contacted' | 'converted';
 }
 
+export interface CartItem {
+  product: Product;
+  quantity: number;
+  selectedColor?: string;
+}
+
 export type ActiveView = 'store' | 'admin';
 export type CustomerPage = 'home' | 'catalogue' | 'product' | 'contact' | 'about' | 'wishlist';
-export type AdminTab = 'analytics' | 'products' | 'categories' | 'banners' | 'cms' | 'settings';
+export type AdminTab = 'analytics' | 'products' | 'categories' | 'banners' | 'cms' | 'theme' | 'settings';
 
 export interface SiteAnnouncement {
   enabled: boolean;
@@ -149,10 +155,86 @@ export interface SectionToggles {
   showSimilarProducts: boolean;
 }
 
+export interface CraftStageItem {
+  step: string;
+  phase: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  badge: string;
+  image: string;
+  alt: string;
+  caption: string;
+}
+
+export interface SiteCraftJourney {
+  badge: string;
+  heading: string;
+  description: string;
+  stages: CraftStageItem[];
+  techniqueNote1: string;
+  techniqueNote2: string;
+}
+
+export interface CustomThemeSettings {
+  textPrimary: string;
+  textMuted: string;
+  pageBackground: string;
+  cardBackground: string;
+  borderColor: string;
+  brandAccent: string;
+  brandAccentHover: string;
+  sections: {
+    navbar: {
+      bg?: string;
+      text?: string;
+    };
+    hero: {
+      bg?: string;
+      titleColor?: string;
+      btnBg?: string;
+      btnText?: string;
+    };
+    categories: {
+      bg?: string;
+      titleColor?: string;
+      cardBg?: string;
+    };
+    featured: {
+      bg?: string;
+      titleColor?: string;
+      cardBg?: string;
+    };
+    craft: {
+      bg?: string;
+      cardBg?: string;
+      titleColor?: string;
+      textColor?: string;
+    };
+    story: {
+      bg?: string;
+      cardBg?: string;
+      titleColor?: string;
+      textColor?: string;
+      btnBg?: string;
+    };
+    instagram: {
+      bg?: string;
+      titleColor?: string;
+    };
+    footer: {
+      bg?: string;
+      textColor?: string;
+    };
+  };
+}
+
 export interface UniversalSiteContent {
   announcement: SiteAnnouncement;
   hero: SiteHero;
   about: SiteAbout;
   contact: SiteContact;
   toggles: SectionToggles;
+  craftJourney?: SiteCraftJourney;
+  theme?: CustomThemeSettings;
 }

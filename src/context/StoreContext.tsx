@@ -9,7 +9,10 @@ import {
   CustomerPage,
   AdminTab,
   AvailabilityStatus,
-  UniversalSiteContent
+  UniversalSiteContent,
+  CartItem,
+  CustomThemeSettings,
+  SiteCraftJourney
 } from '../types';
 import {
   INITIAL_PRODUCTS,
@@ -73,6 +76,67 @@ export const INITIAL_SITE_CONTENT: UniversalSiteContent = {
     showCraftJourney: true,
     showTestimonials: true,
     showSimilarProducts: true
+  },
+  craftJourney: {
+    badge: 'Living Craft In Action',
+    heading: 'The Journey of a Hand-Tied Dot',
+    description: 'From tying tiny knots to dyeing and opening, each Bandhani textile takes time, patience and skilled hands. We work with traditional methods, keeping the heritage alive.',
+    techniqueNote1: 'Passed through Khatri families in Kutch since 400+ years.',
+    techniqueNote2: 'Zero wax, zero petroleum—only fingertips & high-twist cotton thread.',
+    stages: [
+      {
+        step: '01',
+        phase: 'Bandhana',
+        title: 'The Hand-Tied Resist',
+        subtitle: 'Raw Mulberry Silk Pinched & Bound',
+        description: 'Using a pointed silver ring, the artisan deft-gathers a minute pinch of raw silk fabric. High-twist cotton thread is wound tightly around the cone, creating an impervious mechanical seal against liquid dyes.',
+        badge: 'Artisan Workshop • Bhadli, Kutch',
+        image: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1200&q=85',
+        alt: 'Artisan hands tying Bandhani knots with cotton thread',
+        caption: 'Artisan hands pinching 1mm silk knots with thread resist'
+      },
+      {
+        step: '02',
+        phase: 'Rangai',
+        title: 'The Natural Dye Bath',
+        subtitle: 'Capillary Liquid Dye Immersion',
+        description: 'The fabric is submerged into warm fermented madder root and pomegranate rind vats. The rich crimson dye bleeds naturally through the porous silk fibers, stopped dead at the bound thread boundary.',
+        badge: 'Natural Fermented Dye Vat',
+        image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=85',
+        alt: 'Natural dye vat process in Kutch',
+        caption: 'Sequential immersion in vegetable & madder root dye vats'
+      },
+      {
+        step: '03',
+        phase: 'Khilana',
+        title: 'The Crinkled Bloom',
+        subtitle: 'Untying Reveals the Iconic Rosette',
+        description: 'After drying under the Kutch sun, the fabric is gently pulled corner to corner. The threads pop open to reveal the legendary puckered Bandhani dot with its diamond core and signature textured crush.',
+        badge: 'Finished Heirloom Silk',
+        image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=85',
+        alt: 'Opened Bandhani silk cloth with signature crinkle bloom',
+        caption: 'The revealed crinkled Bandhani bloom with signature texture'
+      }
+    ]
+  },
+  theme: {
+    textPrimary: '#241E1C',
+    textMuted: '#6E6259',
+    pageBackground: '#FBF8F3',
+    cardBackground: '#F5EFE6',
+    borderColor: '#E2D7C7',
+    brandAccent: '#4A121A',
+    brandAccentHover: '#380D13',
+    sections: {
+      navbar: { bg: '', text: '' },
+      hero: { bg: '', titleColor: '', btnBg: '', btnText: '' },
+      categories: { bg: '', titleColor: '', cardBg: '' },
+      featured: { bg: '', titleColor: '', cardBg: '' },
+      craft: { bg: '', cardBg: '', titleColor: '', textColor: '' },
+      story: { bg: '', cardBg: '', titleColor: '', textColor: '', btnBg: '' },
+      instagram: { bg: '', titleColor: '' },
+      footer: { bg: '', textColor: '' }
+    }
   }
 };
 
@@ -107,6 +171,17 @@ interface StoreContextType {
   toggleWishlist: (productId: string) => void;
   isWishlisted: (productId: string) => boolean;
 
+  // Cart
+  cart: CartItem[];
+  addToCart: (product: Product, quantity?: number, selectedColor?: string) => void;
+  removeFromCart: (productId: string) => void;
+  updateCartQuantity: (productId: string, delta: number) => void;
+  clearCart: () => void;
+  isCartOpen: boolean;
+  setIsCartOpen: (open: boolean) => void;
+  totalCartItems: number;
+  totalCartPrice: number;
+
   // Data
   products: Product[];
   categories: Category[];
@@ -117,6 +192,11 @@ interface StoreContextType {
 
   // Content CMS
   updateSiteContent: (content: UniversalSiteContent) => Promise<void>;
+
+  // Custom Theme & Colors
+  theme: CustomThemeSettings;
+  updateTheme: (newTheme: Partial<CustomThemeSettings>) => void;
+  resetTheme: () => void;
 
   // Product Actions
   addProduct: (product: Omit<Product, 'id' | 'createdAt' | 'views' | 'enquiriesCount'>) => Promise<Product>;
@@ -152,13 +232,14 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'bandhanu_products_v5',
-  CATEGORIES: 'bandhanu_categories_v5',
-  BANNERS: 'bandhanu_banners_v5',
-  PROFILE: 'bandhanu_profile_v5',
-  ENQUIRIES: 'bandhanu_enquiries_v5',
-  WISHLIST: 'bandhanu_wishlist_v5',
-  SITE_CONTENT: 'bandhanu_site_content_v5',
+  PRODUCTS: 'bandhanu_products_v6',
+  CATEGORIES: 'bandhanu_categories_v6',
+  BANNERS: 'bandhanu_banners_v6',
+  PROFILE: 'bandhanu_profile_v6',
+  ENQUIRIES: 'bandhanu_enquiries_v6',
+  WISHLIST: 'bandhanu_wishlist_v6',
+  CART: 'bandhanu_cart_v6',
+  SITE_CONTENT: 'bandhanu_site_content_v6',
   STUDIO_AUTH: 'bandhanu_studio_session'
 };
 
@@ -209,6 +290,60 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return [];
     }
   });
+
+  // Cart State
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.CART);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
+  }, [cart]);
+
+  const addToCart = (product: Product, quantity: number = 1, selectedColor?: string) => {
+    const color = selectedColor || product.colors[0]?.name || 'Standard';
+    setCart(prev => {
+      const existing = prev.find(item => item.product.id === product.id && item.selectedColor === color);
+      if (existing) {
+        return prev.map(item =>
+          item.product.id === product.id && item.selectedColor === color
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      }
+      return [...prev, { product, quantity, selectedColor: color }];
+    });
+    setIsCartOpen(true);
+  };
+
+  const removeFromCart = (productId: string) => {
+    setCart(prev => prev.filter(item => item.product.id !== productId));
+  };
+
+  const updateCartQuantity = (productId: string, delta: number) => {
+    setCart(prev =>
+      prev
+        .map(item => {
+          if (item.product.id === productId) {
+            const newQty = item.quantity + delta;
+            return newQty > 0 ? { ...item, quantity: newQty } : null;
+          }
+          return item;
+        })
+        .filter((item): item is CartItem => item !== null)
+    );
+  };
+
+  const clearCart = () => setCart([]);
+
+  const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalCartPrice = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   // Persistent Domain States (Local cache defaults)
   const [products, setProducts] = useState<Product[]>(() => {
@@ -293,6 +428,56 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.WISHLIST, JSON.stringify(wishlist));
   }, [wishlist]);
+
+  // Dynamic Theme Management
+  const theme: CustomThemeSettings = siteContent.theme || INITIAL_SITE_CONTENT.theme!;
+
+  const updateTheme = (newTheme: Partial<CustomThemeSettings>) => {
+    const merged: CustomThemeSettings = {
+      ...theme,
+      ...newTheme,
+      sections: {
+        ...theme.sections,
+        ...(newTheme.sections || {})
+      }
+    };
+    const updatedContent: UniversalSiteContent = {
+      ...siteContent,
+      theme: merged
+    };
+    setSiteContent(updatedContent);
+    localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(updatedContent));
+  };
+
+  const resetTheme = () => {
+    const defaultTheme = INITIAL_SITE_CONTENT.theme!;
+    const updatedContent: UniversalSiteContent = {
+      ...siteContent,
+      theme: defaultTheme
+    };
+    setSiteContent(updatedContent);
+    localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(updatedContent));
+  };
+
+  // Sync custom theme colors to CSS custom properties and document body
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme) {
+      if (theme.textPrimary) {
+        root.style.setProperty('--brand-charcoal', theme.textPrimary);
+        document.body.style.color = theme.textPrimary;
+      }
+      if (theme.textMuted) root.style.setProperty('--brand-muted', theme.textMuted);
+      if (theme.pageBackground) {
+        root.style.setProperty('--brand-cream', theme.pageBackground);
+        document.body.style.backgroundColor = theme.pageBackground;
+      }
+      if (theme.cardBackground) root.style.setProperty('--brand-sand', theme.cardBackground);
+      if (theme.borderColor) root.style.setProperty('--brand-sand-border', theme.borderColor);
+      if (theme.brandAccent) root.style.setProperty('--brand-maroon', theme.brandAccent);
+      if (theme.brandAccentHover) root.style.setProperty('--brand-maroon-dark', theme.brandAccentHover);
+    }
+  }, [theme]);
 
   // Load live data from Supabase Cloud Database
   useEffect(() => {
@@ -834,6 +1019,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         wishlist,
         toggleWishlist,
         isWishlisted,
+        cart,
+        addToCart,
+        removeFromCart,
+        updateCartQuantity,
+        clearCart,
+        isCartOpen,
+        setIsCartOpen,
+        totalCartItems,
+        totalCartPrice,
         products,
         categories,
         banners,
@@ -841,6 +1035,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         enquiryLogs,
         siteContent,
         updateSiteContent,
+        theme,
+        updateTheme,
+        resetTheme,
         addProduct,
         updateProduct,
         deleteProduct,

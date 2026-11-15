@@ -86,18 +86,16 @@ Looking forward to hearing from your master artisans!`;
   };
 
   return (
-    <div className="min-h-screen bg-heritage-cream dark:bg-heritage-darkSurface pb-24">
+    <div className="min-h-screen bg-[#FBF8F3] pb-24 animate-fade-in">
       {/* Hero Banner */}
-      <section className="relative py-16 sm:py-24 bg-gradient-to-b from-heritage-sand/40 via-heritage-cream to-transparent dark:from-heritage-darkCard/60 dark:via-heritage-darkSurface border-b border-heritage-gold/20 overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(#C5A059_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
-        
+      <section className="relative py-16 sm:py-24 bg-[#F5EFE6] border-b border-[#E2D7C7] overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-heritage-gold/15 text-heritage-crimson dark:text-heritage-gold text-xs font-bold uppercase tracking-wider mb-4 border border-heritage-gold/30">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-[#4A121A] text-xs font-bold uppercase tracking-wider mb-4 border border-[#E2D7C7]">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Jamnagar Artisan Concierge</span>
+            <span>Bhadli, Kutch Artisan Concierge</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-heritage-charcoal dark:text-white tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#241E1C] tracking-tight leading-tight">
             Connect With Our Atelier
           </h1>
 

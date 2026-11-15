@@ -13,14 +13,15 @@ import {
   ToggleRight,
   Globe,
   RefreshCw,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Camera
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const SiteContentCMS: React.FC = () => {
   const { siteContent, updateSiteContent } = useStore();
 
-  const [activeTab, setActiveTab] = useState<'announcement' | 'hero' | 'about' | 'contact' | 'toggles'>('hero');
+  const [activeTab, setActiveTab] = useState<'announcement' | 'hero' | 'craft' | 'about' | 'contact' | 'toggles'>('craft');
   const [formData, setFormData] = useState<UniversalSiteContent>(siteContent);
   const [savedToast, setSavedToast] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -86,11 +87,12 @@ export const SiteContentCMS: React.FC = () => {
       {/* CMS Sub-navigation Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-heritage-gold/20">
         {[
-          { id: 'hero', label: '1. Hero Section', icon: Sparkles },
-          { id: 'announcement', label: '2. Announcement Bar', icon: Layers },
-          { id: 'about', label: '3. About & Vision Pillars', icon: FileText },
-          { id: 'contact', label: '4. Studio Contact & Hours', icon: Phone },
-          { id: 'toggles', label: '5. Section Visibility Toggles', icon: ToggleRight }
+          { id: 'craft', label: '1. Craft Journey (Hand-Tied Dot)', icon: Camera },
+          { id: 'hero', label: '2. Hero Section', icon: Sparkles },
+          { id: 'announcement', label: '3. Announcement Bar', icon: Layers },
+          { id: 'about', label: '4. About & Vision Pillars', icon: FileText },
+          { id: 'contact', label: '5. Studio Contact & Hours', icon: Phone },
+          { id: 'toggles', label: '6. Section Visibility Toggles', icon: ToggleRight }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -113,6 +115,309 @@ export const SiteContentCMS: React.FC = () => {
 
       {/* Form Content */}
       <form onSubmit={handleSave} className="space-y-6">
+        {/* TAB: CRAFT JOURNEY (THE JOURNEY OF A HAND-TIED DOT) */}
+        {activeTab === 'craft' && (
+          <div className="p-6 rounded-3xl bg-white dark:bg-heritage-darkCard border border-heritage-gold/30 shadow-md space-y-6">
+            <div className="flex items-center justify-between border-b border-heritage-gold/20 pb-3">
+              <div>
+                <h3 className="font-serif font-bold text-lg text-heritage-charcoal dark:text-white">
+                  Craft Journey ("The Journey of a Hand-Tied Dot")
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Change photos, titles, phases, captions, descriptions, and heritage notes for all 3 stages.
+                </p>
+              </div>
+            </div>
+
+            {/* Section Header Settings */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                  Section Kicker Badge
+                </label>
+                <input
+                  type="text"
+                  value={formData.craftJourney?.badge || 'Living Craft In Action'}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      craftJourney: {
+                        ...(formData.craftJourney || ({} as any)),
+                        badge: e.target.value
+                      }
+                    })
+                  }
+                  className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/15 dark:bg-heritage-darkSurface dark:text-white text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                  Main Section Headline
+                </label>
+                <input
+                  type="text"
+                  value={formData.craftJourney?.heading || 'The Journey of a Hand-Tied Dot'}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      craftJourney: {
+                        ...(formData.craftJourney || ({} as any)),
+                        heading: e.target.value
+                      }
+                    })
+                  }
+                  className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/15 dark:bg-heritage-darkSurface dark:text-white text-xs"
+                />
+              </div>
+            </div>
+
+            {/* Stages Editor Cards (Stage 1, Stage 2, Stage 3) */}
+            <div className="space-y-6 pt-2">
+              <h4 className="font-serif font-bold text-sm text-heritage-charcoal dark:text-white flex items-center gap-2">
+                <Camera className="w-4 h-4 text-heritage-gold" />
+                <span>The 3 Living Craft Stages (Photos & Text)</span>
+              </h4>
+
+              {(formData.craftJourney?.stages || []).map((stageItem, index) => (
+                <div
+                  key={index}
+                  className="p-5 rounded-2xl bg-heritage-sand/20 dark:bg-heritage-darkSurface border border-heritage-gold/25 space-y-4"
+                >
+                  <div className="flex items-center justify-between border-b border-heritage-gold/15 pb-2">
+                    <span className="font-serif font-bold text-xs sm:text-sm text-heritage-crimson dark:text-heritage-gold">
+                      Stage {stageItem.step || `0${index + 1}`} • {stageItem.phase}
+                    </span>
+                    <span className="text-[10px] text-gray-400 font-mono">Stage #{index + 1}</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+                    {/* Left: Photo Preview & URL input */}
+                    <div className="md:col-span-5 space-y-2">
+                      <div className="aspect-[4/3] w-full rounded-xl overflow-hidden bg-gray-100 border border-heritage-gold/30 relative">
+                        <img
+                          src={stageItem.image}
+                          alt={stageItem.title}
+                          className="w-full h-full object-cover object-center"
+                          onError={(e) => {
+                            (e.target as HTMLElement).setAttribute('src', 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80');
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-heritage-charcoal dark:text-gray-300 uppercase tracking-wider mb-1">
+                          Photo Image URL
+                        </label>
+                        <input
+                          type="text"
+                          value={stageItem.image}
+                          onChange={(e) => {
+                            const newStages = [...(formData.craftJourney?.stages || [])];
+                            newStages[index] = { ...stageItem, image: e.target.value };
+                            setFormData({
+                              ...formData,
+                              craftJourney: {
+                                ...(formData.craftJourney || ({} as any)),
+                                stages: newStages
+                              }
+                            });
+                          }}
+                          className="w-full p-2 rounded-lg border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs font-mono"
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+
+                    {/* Right: Text & Details */}
+                    <div className="md:col-span-7 space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                            Phase Name (e.g. Bandhana)
+                          </label>
+                          <input
+                            type="text"
+                            value={stageItem.phase}
+                            onChange={(e) => {
+                              const newStages = [...(formData.craftJourney?.stages || [])];
+                              newStages[index] = { ...stageItem, phase: e.target.value };
+                              setFormData({
+                                ...formData,
+                                craftJourney: {
+                                  ...(formData.craftJourney || ({} as any)),
+                                  stages: newStages
+                                }
+                              });
+                            }}
+                            className="w-full p-2 rounded-lg border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                            Badge Tag
+                          </label>
+                          <input
+                            type="text"
+                            value={stageItem.badge}
+                            onChange={(e) => {
+                              const newStages = [...(formData.craftJourney?.stages || [])];
+                              newStages[index] = { ...stageItem, badge: e.target.value };
+                              setFormData({
+                                ...formData,
+                                craftJourney: {
+                                  ...(formData.craftJourney || ({} as any)),
+                                  stages: newStages
+                                }
+                              });
+                            }}
+                            className="w-full p-2 rounded-lg border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          Stage Title
+                        </label>
+                        <input
+                          type="text"
+                          value={stageItem.title}
+                          onChange={(e) => {
+                            const newStages = [...(formData.craftJourney?.stages || [])];
+                            newStages[index] = { ...stageItem, title: e.target.value };
+                            setFormData({
+                              ...formData,
+                              craftJourney: {
+                                ...(formData.craftJourney || ({} as any)),
+                                stages: newStages
+                              }
+                            });
+                          }}
+                          className="w-full p-2 rounded-lg border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs font-semibold"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          Stage Subtitle
+                        </label>
+                        <input
+                          type="text"
+                          value={stageItem.subtitle}
+                          onChange={(e) => {
+                            const newStages = [...(formData.craftJourney?.stages || [])];
+                            newStages[index] = { ...stageItem, subtitle: e.target.value };
+                            setFormData({
+                              ...formData,
+                              craftJourney: {
+                                ...(formData.craftJourney || ({} as any)),
+                                stages: newStages
+                              }
+                            });
+                          }}
+                          className="w-full p-2 rounded-lg border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          Photo Description Paragraph
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={stageItem.description}
+                          onChange={(e) => {
+                            const newStages = [...(formData.craftJourney?.stages || [])];
+                            newStages[index] = { ...stageItem, description: e.target.value };
+                            setFormData({
+                              ...formData,
+                              craftJourney: {
+                                ...(formData.craftJourney || ({} as any)),
+                                stages: newStages
+                              }
+                            });
+                          }}
+                          className="w-full p-2 rounded-lg border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs resize-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          Photo Caption Text
+                        </label>
+                        <input
+                          type="text"
+                          value={stageItem.caption}
+                          onChange={(e) => {
+                            const newStages = [...(formData.craftJourney?.stages || [])];
+                            newStages[index] = { ...stageItem, caption: e.target.value };
+                            setFormData({
+                              ...formData,
+                              craftJourney: {
+                                ...(formData.craftJourney || ({} as any)),
+                                stages: newStages
+                              }
+                            });
+                          }}
+                          className="w-full p-2 rounded-lg border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs italic"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Heritage Technique Bullet Points */}
+            <div className="pt-2 border-t border-heritage-gold/20 space-y-3">
+              <h4 className="font-serif font-bold text-xs uppercase text-heritage-charcoal dark:text-white">
+                Artisan Technique Footnotes
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                    Technique Point 1
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.craftJourney?.techniqueNote1 || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        craftJourney: {
+                          ...(formData.craftJourney || ({} as any)),
+                          techniqueNote1: e.target.value
+                        }
+                      })
+                    }
+                    className="w-full p-2 rounded-lg border border-heritage-gold/30 bg-heritage-sand/15 dark:bg-heritage-darkSurface dark:text-white text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                    Technique Point 2
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.craftJourney?.techniqueNote2 || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        craftJourney: {
+                          ...(formData.craftJourney || ({} as any)),
+                          techniqueNote2: e.target.value
+                        }
+                      })
+                    }
+                    className="w-full p-2 rounded-lg border border-heritage-gold/30 bg-heritage-sand/15 dark:bg-heritage-darkSurface dark:text-white text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* TAB 1: HERO SECTION */}
         {activeTab === 'hero' && (
           <div className="p-6 rounded-3xl bg-white dark:bg-heritage-darkCard border border-heritage-gold/30 shadow-md space-y-6">

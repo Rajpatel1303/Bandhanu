@@ -4,6 +4,7 @@ import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { QuickViewModal } from './components/common/QuickViewModal';
+import { CartDrawer } from './components/common/CartDrawer';
 
 // Dedicated Customer Pages (100% Public Storefront)
 import { HomePage } from './pages/HomePage';
@@ -21,6 +22,7 @@ import { ProductList } from './components/admin/ProductList';
 import { CategoryManager } from './components/admin/CategoryManager';
 import { BannerManager } from './components/admin/BannerManager';
 import { SiteContentCMS } from './components/admin/SiteContentCMS';
+import { ThemeCustomizer } from './components/admin/ThemeCustomizer';
 import { BusinessSettings } from './components/admin/BusinessSettings';
 
 const AppContent: React.FC = () => {
@@ -53,6 +55,7 @@ const AppContent: React.FC = () => {
         {adminTab === 'products' && <ProductList />}
         {adminTab === 'categories' && <CategoryManager />}
         {adminTab === 'cms' && <SiteContentCMS />}
+        {adminTab === 'theme' && <ThemeCustomizer />}
         {adminTab === 'banners' && <BannerManager />}
         {adminTab === 'settings' && <BusinessSettings />}
       </AdminLayout>
@@ -91,6 +94,7 @@ const AppContent: React.FC = () => {
       </main>
 
       <Footer />
+      <CartDrawer />
       <FloatingWhatsApp />
       <QuickViewModal />
     </div>

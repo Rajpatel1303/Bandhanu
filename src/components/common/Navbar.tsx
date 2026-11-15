@@ -1,214 +1,184 @@
 import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { getWhatsAppDirectUrl, openWhatsAppDirect } from '../../utils/whatsapp';
-import {
-  Search,
-  Heart,
-  MessageCircle,
-  Menu,
-  X,
-  Sparkles,
-  ShoppingBag
-} from 'lucide-react';
+import { Search, Heart, ShoppingBag, Menu, X } from 'lucide-react';
+import { InstagramIcon } from './InstagramIcon';
 
 export const Navbar: React.FC = () => {
   const {
-    activeView,
     currentPage,
     setCurrentPage,
-    categories,
-    selectedCategory,
-    navigateToCategory,
+    setSelectedProductId,
+    setSelectedCategory,
     searchQuery,
     setSearchQuery,
     wishlist,
+    setIsCartOpen,
+    totalCartItems,
     profile,
-    selectedProductId,
-    siteContent
+    theme
   } = useStore();
+
+  const navStyles = theme?.sections?.navbar;
+  const navBg = navStyles?.bg || undefined;
+  const navText = navStyles?.text || undefined;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
   const handleNavClick = (page: 'home' | 'catalogue' | 'about' | 'contact' | 'wishlist') => {
+    setSelectedProductId(null);
     setCurrentPage(page);
     setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCategoryClick = (slug: string | null) => {
-    navigateToCategory(slug);
+  const handleCraftClick = () => {
+    setSelectedProductId(null);
+    if (currentPage !== 'home') {
+      setCurrentPage('home');
+      setTimeout(() => {
+        const craftEl = document.getElementById('our-craft-section');
+        if (craftEl) craftEl.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      const craftEl = document.getElementById('our-craft-section');
+      if (craftEl) craftEl.scrollIntoView({ behavior: 'smooth' });
+    }
     setMobileMenuOpen(false);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      setSelectedProductId(null);
       setCurrentPage('catalogue');
       setSearchOpen(false);
     }
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#FFFDF9]/95 dark:bg-heritage-darkSurface/95 backdrop-blur-md border-b border-heritage-gold/20 transition-colors duration-300">
-      {/* Top Announcement Bar (Configurable from Studio CMS) */}
-      {siteContent?.toggles?.showAnnouncement && siteContent?.announcement?.enabled && (
-        <div className="bg-gradient-to-r from-heritage-crimson via-heritage-ruby to-heritage-terracotta text-white py-1.5 px-4 text-xs font-medium text-center flex items-center justify-center gap-3">
-          <span className="flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-heritage-gold animate-pulse" />
-            <span>{siteContent.announcement.text}</span>
-          </span>
-          {siteContent.announcement.subtext && (
-            <>
-              <span className="hidden md:inline text-white/50">•</span>
-              <span className="hidden md:inline text-heritage-gold font-semibold">
-                {siteContent.announcement.subtext}
-              </span>
-            </>
-          )}
-          <span className="hidden md:inline text-white/50">•</span>
-          <a
-            href={getWhatsAppDirectUrl(profile.whatsappNumber)}
-            onClick={(e) => {
-              e.preventDefault();
-              openWhatsAppDirect(profile.whatsappNumber, 'Hello Bandhanu team! I am contacting you from the website announcement bar.');
-            }}
-            className="hidden sm:inline-flex items-center gap-1 underline text-white/90 hover:text-white"
-          >
-            <MessageCircle className="w-3 h-3 text-emerald-400 fill-emerald-400" />
-            <span>{siteContent.announcement.ctaText}</span>
-          </a>
-        </div>
-      )}
-
-      {/* Main Navbar */}
+    <header
+      style={{ backgroundColor: navBg, color: navText }}
+      className="sticky top-0 z-40 bg-[#FBF8F3]/95 backdrop-blur-md border-b border-[#E2D7C7] transition-all"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
-          {/* Mobile Menu Button */}
-          <div className="flex items-center lg:hidden">
+          {/* Mobile Menu Toggle Button */}
+          <div className="flex items-center md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-heritage-charcoal dark:text-gray-200 hover:bg-heritage-sand/60 focus:outline-none transition-colors"
-              aria-label="Toggle menu"
+              className="p-2 rounded-lg text-[#241E1C] hover:bg-[#F5EFE6] transition-colors"
+              aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
 
-          {/* Brand Monogram & Title */}
+          {/* Left: Classic Typographic Logo matching mockup */}
           <div
-            className="flex items-center gap-3 cursor-pointer group"
             onClick={() => handleNavClick('home')}
+            className="cursor-pointer text-center md:text-left group select-none"
           >
-            <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-heritage-crimson to-heritage-ruby p-0.5 shadow-md group-hover:scale-105 transition-transform duration-300">
-              <div className="w-full h-full rounded-full border border-heritage-gold/50 flex items-center justify-center bg-heritage-crimson text-heritage-gold font-serif font-bold text-lg tracking-wider">
-                BD
-              </div>
-              {/* Decorative Bandhani Dot */}
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-heritage-gold border-2 border-white flex items-center justify-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-heritage-crimson"></span>
-              </div>
-            </div>
-
-            <div>
-              <span className="font-serif font-bold text-xl sm:text-2xl tracking-wide text-heritage-crimson dark:text-heritage-gold drop-shadow-xs block leading-tight">
-                Bandhanu
-              </span>
-              <span className="block text-[8px] sm:text-[10px] tracking-[0.18em] uppercase text-heritage-charcoal/70 dark:text-gray-400 font-medium">
-                Where Heritage Meets Style
-              </span>
-            </div>
+            <span className="font-serif font-bold text-2xl sm:text-3xl tracking-[0.12em] text-[#4A121A] block leading-none group-hover:text-[#380D13] transition-colors">
+              BANDHANU
+            </span>
+            <span className="block text-[8px] sm:text-[9.5px] tracking-[0.25em] text-[#6E6259] uppercase font-medium mt-1">
+              Tie and Dye Textile
+            </span>
           </div>
 
-          {/* Desktop Navigation Links (100% Customer Facing) */}
-          <nav className="hidden lg:flex items-center space-x-8">
+          {/* Center: Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center space-x-9">
             <button
               onClick={() => handleNavClick('home')}
-              className={`text-sm font-medium transition-colors relative py-1 cursor-pointer ${
-                currentPage === 'home' && !selectedProductId && activeView === 'store'
-                  ? 'text-heritage-crimson dark:text-heritage-gold font-semibold'
-                  : 'text-heritage-charcoal dark:text-gray-200 hover:text-heritage-crimson'
+              className={`text-sm tracking-wide transition-all relative py-1 font-medium cursor-pointer ${
+                currentPage === 'home'
+                  ? 'text-[#4A121A] font-semibold'
+                  : 'text-[#241E1C]/80 hover:text-[#4A121A]'
               }`}
             >
               Home
-              {currentPage === 'home' && !selectedProductId && activeView === 'store' && (
-                <span className="absolute bottom-0 inset-x-0 h-0.5 bg-heritage-crimson dark:bg-heritage-gold rounded-full" />
+              {currentPage === 'home' && (
+                <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#4A121A] rounded-full" />
               )}
             </button>
 
             <button
-              onClick={() => handleCategoryClick(null)}
-              className={`text-sm font-medium transition-colors relative py-1 flex items-center gap-1.5 cursor-pointer ${
-                currentPage === 'catalogue' && !selectedProductId && activeView === 'store'
-                  ? 'text-heritage-crimson dark:text-heritage-gold font-semibold'
-                  : 'text-heritage-charcoal dark:text-gray-200 hover:text-heritage-crimson'
+              onClick={() => {
+                setSelectedCategory(null);
+                handleNavClick('catalogue');
+              }}
+              className={`text-sm tracking-wide transition-all relative py-1 font-medium cursor-pointer ${
+                currentPage === 'catalogue'
+                  ? 'text-[#4A121A] font-semibold'
+                  : 'text-[#241E1C]/80 hover:text-[#4A121A]'
               }`}
             >
-              <span>Catalogue</span>
-              <span className="text-[10px] bg-heritage-gold/25 text-heritage-crimson dark:text-heritage-gold px-1.5 py-0.5 rounded-full font-bold">
-                All
-              </span>
-              {currentPage === 'catalogue' && !selectedProductId && activeView === 'store' && (
-                <span className="absolute bottom-0 inset-x-0 h-0.5 bg-heritage-crimson dark:bg-heritage-gold rounded-full" />
+              Shop
+              {currentPage === 'catalogue' && (
+                <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#4A121A] rounded-full" />
               )}
+            </button>
+
+            <button
+              onClick={handleCraftClick}
+              className="text-sm tracking-wide transition-all relative py-1 font-medium text-[#241E1C]/80 hover:text-[#4A121A] cursor-pointer"
+            >
+              Our Craft
             </button>
 
             <button
               onClick={() => handleNavClick('about')}
-              className={`text-sm font-medium transition-colors relative py-1 cursor-pointer ${
-                currentPage === 'about' && activeView === 'store'
-                  ? 'text-heritage-crimson dark:text-heritage-gold font-semibold'
-                  : 'text-heritage-charcoal dark:text-gray-200 hover:text-heritage-crimson'
+              className={`text-sm tracking-wide transition-all relative py-1 font-medium cursor-pointer ${
+                currentPage === 'about'
+                  ? 'text-[#4A121A] font-semibold'
+                  : 'text-[#241E1C]/80 hover:text-[#4A121A]'
               }`}
             >
               Our Story
-              {currentPage === 'about' && activeView === 'store' && (
-                <span className="absolute bottom-0 inset-x-0 h-0.5 bg-heritage-crimson dark:bg-heritage-gold rounded-full" />
+              {currentPage === 'about' && (
+                <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#4A121A] rounded-full" />
               )}
             </button>
 
             <button
               onClick={() => handleNavClick('contact')}
-              className={`text-sm font-medium transition-colors relative py-1 cursor-pointer ${
-                currentPage === 'contact' && activeView === 'store'
-                  ? 'text-heritage-crimson dark:text-heritage-gold font-semibold'
-                  : 'text-heritage-charcoal dark:text-gray-200 hover:text-heritage-crimson'
+              className={`text-sm tracking-wide transition-all relative py-1 font-medium cursor-pointer ${
+                currentPage === 'contact'
+                  ? 'text-[#4A121A] font-semibold'
+                  : 'text-[#241E1C]/80 hover:text-[#4A121A]'
               }`}
             >
-              Studio Contact
-              {currentPage === 'contact' && activeView === 'store' && (
-                <span className="absolute bottom-0 inset-x-0 h-0.5 bg-heritage-crimson dark:bg-heritage-gold rounded-full" />
+              Contact
+              {currentPage === 'contact' && (
+                <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#4A121A] rounded-full" />
               )}
             </button>
           </nav>
 
-          {/* Customer Actions (Zero Admin Traces) */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Search Input / Trigger */}
+          {/* Right: Utility Icons (Search, Instagram, Wishlist, Bag) */}
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            {/* Search Dropdown / Trigger */}
             <div className="relative">
               {searchOpen ? (
-                <form onSubmit={handleSearchSubmit} className="flex items-center bg-white dark:bg-heritage-darkCard border border-heritage-gold/40 rounded-full px-3 py-1.5 shadow-sm">
-                  <Search className="w-4 h-4 text-heritage-charcoal/50 mr-2" />
+                <form
+                  onSubmit={handleSearchSubmit}
+                  className="flex items-center bg-white border border-[#E2D7C7] rounded-full px-3 py-1 shadow-xs"
+                >
+                  <Search className="w-4 h-4 text-[#6E6259] mr-2" />
                   <input
                     type="text"
-                    placeholder="Search saree, dupatta, silk..."
+                    placeholder="Search collection..."
                     value={searchQuery}
-                    onChange={e => {
-                      setSearchQuery(e.target.value);
-                      if (currentPage !== 'catalogue' && e.target.value.trim().length > 1) {
-                        setCurrentPage('catalogue');
-                      }
-                    }}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     autoFocus
-                    className="bg-transparent text-xs sm:text-sm text-heritage-charcoal dark:text-gray-100 focus:outline-none w-36 sm:w-56"
+                    className="w-32 sm:w-44 text-xs bg-transparent border-none focus:outline-none text-[#241E1C]"
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      setSearchOpen(false);
-                      setSearchQuery('');
-                    }}
-                    className="p-0.5 text-gray-400 hover:text-gray-600"
+                    onClick={() => setSearchOpen(false)}
+                    className="text-gray-400 hover:text-gray-600 ml-1"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -216,168 +186,116 @@ export const Navbar: React.FC = () => {
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="p-2 rounded-full text-heritage-charcoal dark:text-gray-200 hover:bg-heritage-sand/60 transition-colors"
-                  title="Search products"
+                  className="p-2 text-[#241E1C] hover:text-[#4A121A] hover:bg-[#F5EFE6] rounded-full transition-colors"
+                  aria-label="Search items"
                 >
-                  <Search className="w-5 h-5" />
+                  <Search className="w-4.5 h-4.5" />
                 </button>
               )}
             </div>
 
-            {/* Wishlist Link */}
+            {/* Instagram Link */}
+            <a
+              href="https://instagram.com/bandhanu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-[#241E1C] hover:text-[#4A121A] hover:bg-[#F5EFE6] rounded-full transition-colors hidden xs:flex items-center justify-center"
+              aria-label="Follow us on Instagram"
+            >
+              <InstagramIcon className="w-4.5 h-4.5" />
+            </a>
+
+            {/* Wishlist Link with Badge */}
             <button
               onClick={() => handleNavClick('wishlist')}
-              className={`relative p-2 rounded-full transition-colors cursor-pointer ${
-                currentPage === 'wishlist' && activeView === 'store'
-                  ? 'text-heritage-crimson dark:text-heritage-gold bg-rose-500/10'
-                  : 'text-heritage-charcoal dark:text-gray-200 hover:bg-heritage-sand/60'
-              }`}
-              title="Saved Trousseau Pieces"
+              className="p-2 text-[#241E1C] hover:text-[#4A121A] hover:bg-[#F5EFE6] rounded-full transition-colors relative"
+              aria-label="Wishlist"
             >
-              <Heart className={`w-5 h-5 ${currentPage === 'wishlist' ? 'fill-current' : ''}`} />
+              <Heart className="w-4.5 h-4.5 stroke-[1.8]" />
               {wishlist.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-heritage-crimson text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#4A121A] text-white text-[9px] font-bold flex items-center justify-center">
                   {wishlist.length}
+                </span>
+              )}
+            </button>
+
+            {/* Shopping Bag Button with Counter */}
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="p-2 text-[#241E1C] hover:text-[#4A121A] hover:bg-[#F5EFE6] rounded-full transition-colors relative"
+              aria-label="Shopping Bag"
+            >
+              <ShoppingBag className="w-4.5 h-4.5 stroke-[1.8]" />
+              {totalCartItems > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#4A121A] text-white text-[9px] font-bold flex items-center justify-center">
+                  {totalCartItems}
                 </span>
               )}
             </button>
           </div>
         </div>
 
-        {/* Dynamic Category Quick Ribbon */}
-        {activeView === 'store' && !selectedProductId && (
-          <div className="py-2.5 border-t border-heritage-gold/15 flex items-center gap-2 overflow-x-auto no-scrollbar text-xs">
-            <span className="text-[11px] font-serif italic text-heritage-charcoal/60 dark:text-gray-400 shrink-0">
-              Curated Edits:
-            </span>
-            <button
-              onClick={() => handleCategoryClick(null)}
-              className={`px-3 py-1 rounded-full whitespace-nowrap transition-all font-medium cursor-pointer ${
-                currentPage === 'catalogue' && selectedCategory === null
-                  ? 'bg-heritage-crimson text-white shadow-xs'
-                  : 'bg-heritage-sand/70 text-heritage-charcoal hover:bg-heritage-sand dark:bg-heritage-darkCard dark:text-gray-300'
-              }`}
-            >
-              All Pieces
-            </button>
-            {categories.map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => handleCategoryClick(cat.slug)}
-                className={`px-3 py-1 rounded-full whitespace-nowrap transition-all flex items-center gap-1.5 font-medium cursor-pointer ${
-                  currentPage === 'catalogue' && selectedCategory === cat.slug
-                    ? 'bg-heritage-crimson text-white shadow-xs'
-                    : 'bg-heritage-sand/70 text-heritage-charcoal hover:bg-heritage-sand dark:bg-heritage-darkCard dark:text-gray-300'
-                }`}
-              >
-                <span>{cat.name}</span>
-                {cat.badge && (
-                  <span className="text-[9px] px-1 rounded bg-heritage-gold/30 text-heritage-crimson font-semibold">
-                    {cat.badge}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Mobile Drawer Menu (100% Customer Facing - Zero Admin) */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#FFFDF9] dark:bg-heritage-darkSurface border-b border-heritage-gold/30 px-5 py-4 space-y-4 animate-fade-in shadow-2xl">
-          {/* Main Pages */}
-          <div className="grid grid-cols-2 gap-2">
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden py-4 border-t border-[#E2D7C7] bg-[#FBF8F3] space-y-2 animate-fade-in">
             <button
               onClick={() => handleNavClick('home')}
-              className={`text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                currentPage === 'home' && !selectedProductId
-                  ? 'bg-heritage-crimson text-white'
-                  : 'bg-heritage-sand/50 text-heritage-charcoal dark:bg-heritage-darkCard dark:text-white'
+              className={`block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium ${
+                currentPage === 'home'
+                  ? 'bg-[#4A121A] text-white'
+                  : 'text-[#241E1C] hover:bg-[#F5EFE6]'
               }`}
             >
-              🏠 Home
+              Home
             </button>
             <button
-              onClick={() => handleCategoryClick(null)}
-              className={`text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                currentPage === 'catalogue' && !selectedProductId
-                  ? 'bg-heritage-crimson text-white'
-                  : 'bg-heritage-sand/50 text-heritage-charcoal dark:bg-heritage-darkCard dark:text-white'
+              onClick={() => {
+                setSelectedCategory(null);
+                handleNavClick('catalogue');
+              }}
+              className={`block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium ${
+                currentPage === 'catalogue'
+                  ? 'bg-[#4A121A] text-white'
+                  : 'text-[#241E1C] hover:bg-[#F5EFE6]'
               }`}
             >
-              💎 Catalogue
+              Shop
+            </button>
+            <button
+              onClick={handleCraftClick}
+              className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-[#241E1C] hover:bg-[#F5EFE6]"
+            >
+              Our Craft
             </button>
             <button
               onClick={() => handleNavClick('about')}
-              className={`text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              className={`block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium ${
                 currentPage === 'about'
-                  ? 'bg-heritage-crimson text-white'
-                  : 'bg-heritage-sand/50 text-heritage-charcoal dark:bg-heritage-darkCard dark:text-white'
+                  ? 'bg-[#4A121A] text-white'
+                  : 'text-[#241E1C] hover:bg-[#F5EFE6]'
               }`}
             >
-              📖 Our Story
+              Our Story
             </button>
             <button
               onClick={() => handleNavClick('contact')}
-              className={`text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              className={`block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium ${
                 currentPage === 'contact'
-                  ? 'bg-heritage-crimson text-white'
-                  : 'bg-heritage-sand/50 text-heritage-charcoal dark:bg-heritage-darkCard dark:text-white'
+                  ? 'bg-[#4A121A] text-white'
+                  : 'text-[#241E1C] hover:bg-[#F5EFE6]'
               }`}
             >
-              📍 Studio Contact
+              Contact
+            </button>
+            <button
+              onClick={() => handleNavClick('wishlist')}
+              className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-[#241E1C] hover:bg-[#F5EFE6]"
+            >
+              Wishlist ({wishlist.length})
             </button>
           </div>
-
-          {/* Categories Grid */}
-          <div className="pt-2 border-t border-heritage-gold/20">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-heritage-charcoal/60 dark:text-gray-400 block mb-2">
-              Browse by Garment
-            </span>
-            <div className="grid grid-cols-2 gap-1.5">
-              {categories.map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => handleCategoryClick(cat.slug)}
-                  className="text-left px-3 py-2 rounded-lg bg-heritage-sand/30 dark:bg-heritage-darkCard/50 text-xs font-medium text-heritage-charcoal dark:text-gray-200 hover:text-heritage-crimson"
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Wishlist Mobile Link */}
-          <button
-            onClick={() => handleNavClick('wishlist')}
-            className="w-full py-2.5 px-3 rounded-xl bg-rose-500/10 text-heritage-crimson text-xs font-bold flex items-center justify-between"
-          >
-            <span className="flex items-center gap-2">
-              <Heart className="w-4 h-4 fill-current" />
-              <span>Saved Wishlist Pieces</span>
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-heritage-crimson text-white text-[10px]">
-              {wishlist.length}
-            </span>
-          </button>
-
-          {/* Action WhatsApp Concierge */}
-          <div className="pt-2 border-t border-heritage-gold/20">
-            <a
-              href={getWhatsAppDirectUrl(profile.whatsappNumber, 'Hello Bandhanu team! I am browsing your mobile catalogue and would like some assistance.')}
-              onClick={(e) => {
-                e.preventDefault();
-                setMobileMenuOpen(false);
-                openWhatsAppDirect(profile.whatsappNumber, 'Hello Bandhanu team! I am browsing your mobile catalogue and would like some assistance.');
-              }}
-              className="w-full py-3 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all"
-            >
-              <MessageCircle className="w-4 h-4 fill-white" />
-              <span>WhatsApp Studio Concierge</span>
-            </a>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </header>
   );
 };

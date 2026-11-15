@@ -11,7 +11,8 @@ import {
   Sparkles,
   ShoppingBag,
   RefreshCw,
-  Lock
+  Lock,
+  Palette
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -35,6 +36,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { tab: 'products', label: 'Products Catalogue', icon: Package, badge: products.length },
     { tab: 'categories', label: 'Categories & Subs', icon: Layers, badge: categories.length },
     { tab: 'cms', label: 'Universal Site CMS', icon: Sparkles, badge: 'Full Edit' },
+    { tab: 'theme', label: 'Theme & Colors', icon: Palette, badge: 'Live' },
     { tab: 'banners', label: 'Hero Banners', icon: Image },
     { tab: 'settings', label: 'WhatsApp & Business', icon: Settings }
   ];
