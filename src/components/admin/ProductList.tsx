@@ -9,12 +9,7 @@ import {
   Trash2,
   Star,
   ExternalLink,
-  MessageCircle,
-  Eye,
-  Filter,
-  CheckCircle,
-  Clock,
-  AlertCircle
+  MessageCircle
 } from 'lucide-react';
 
 export const ProductList: React.FC = () => {
@@ -25,8 +20,7 @@ export const ProductList: React.FC = () => {
     toggleFeatured,
     toggleAvailability,
     profile,
-    setSelectedProductId,
-    setActiveView
+    navigateToProduct
   } = useStore();
 
   const [search, setSearch] = useState('');
@@ -68,9 +62,7 @@ export const ProductList: React.FC = () => {
   };
 
   const handleViewLive = (id: string) => {
-    setSelectedProductId(id);
-    setActiveView('store');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigateToProduct(id);
   };
 
   return (

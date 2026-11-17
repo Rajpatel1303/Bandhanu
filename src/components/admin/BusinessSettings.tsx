@@ -20,12 +20,45 @@ export const BusinessSettings: React.FC = () => {
     products,
     exportDatabase,
     importDatabase,
-    resetToDemo
+    resetToDemo,
+    dbStatus,
+    setSupabaseCredentials
   } = useStore();
 
   const [formData, setFormData] = useState({ ...profile });
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
+
+  // Supabase Cloud Configuration inputs
+  const [supabaseUrl, setSupabaseUrl] = useState(() => {
+    try {
+      return localStorage.getItem('bandhanu_supabase_url') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [supabaseKey, setSupabaseKey] = useState(() => {
+    try {
+      return localStorage.getItem('bandhanu_supabase_anon_key') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [supabaseSaved, setSupabaseSaved] = useState(false);
+
+  // Sync when profile updates
+  React.useEffect(() => {
+    setFormData({ ...profile });
+  }, [profile]);
+
+  const handleSaveSupabase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (supabaseUrl && supabaseKey) {
+      await setSupabaseCredentials(supabaseUrl, supabaseKey);
+      setSupabaseSaved(true);
+      setTimeout(() => setSupabaseSaved(false), 3000);
+    }
+  };
 
   // Sample product for live WhatsApp preview simulation
   const sampleProduct = products[0] || {
@@ -334,6 +367,87 @@ export const BusinessSettings: React.FC = () => {
           </div>
         </div>
       </form>
+
+      {/* Cloud Database (Supabase) Connectivity Configuration */}
+      <div className="p-6 rounded-3xl bg-white dark:bg-heritage-darkCard border border-heritage-gold/30 shadow-md space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-heritage-gold/20">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold">
+              ⚡
+            </div>
+            <div>
+              <h3 className="font-serif font-bold text-base text-heritage-charcoal dark:text-white">
+                Database Engine & Supabase Cloud Sync
+              </h3>
+              <p className="text-[11px] text-gray-500">
+                All catalogue products, categories, themes, and CMS content are persisted automatically.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {dbStatus === 'connected' ? (
+              <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-700 font-bold border border-emerald-500/30 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Supabase Live Sync Active</span>
+              </span>
+            ) : (
+              <span className="px-3 py-1 rounded-full bg-teal-500/15 text-teal-800 font-bold border border-teal-500/30 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-teal-500" />
+                <span>Local Database Storage Active</span>
+              </span>
+            )}
+          </div>
+        </div>
+
+        <form onSubmit={handleSaveSupabase} className="space-y-4 pt-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-semibold mb-1 text-heritage-charcoal dark:text-gray-200">
+                Supabase Project URL
+              </label>
+              <input
+                type="text"
+                placeholder="https://your-project.supabase.co"
+                value={supabaseUrl}
+                onChange={(e) => setSupabaseUrl(e.target.value)}
+                className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/20 dark:bg-heritage-darkSurface font-mono text-xs"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold mb-1 text-heritage-charcoal dark:text-gray-200">
+                Supabase Anon Key
+              </label>
+              <input
+                type="password"
+                placeholder="eyJhbGciOi..."
+                value={supabaseKey}
+                onChange={(e) => setSupabaseKey(e.target.value)}
+                className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/20 dark:bg-heritage-darkSurface font-mono text-xs"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2">
+            <span className="text-[11px] text-gray-500">
+              Leave blank to use default environment variables, or enter your Supabase credentials to sync with your private cloud project.
+            </span>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all shadow-md flex items-center gap-1.5"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>Update Database Connection</span>
+            </button>
+          </div>
+
+          {supabaseSaved && (
+            <p className="text-emerald-600 font-semibold text-xs animate-fade-in">
+              ✓ Database credentials updated! Reloading with new connection...
+            </p>
+          )}
+        </form>
+      </div>
 
       {/* Section 3: Catalogue Backup & Data Portability */}
       <div className="p-6 rounded-3xl bg-heritage-sand/40 dark:bg-heritage-darkCard border border-heritage-gold/30 shadow-xs space-y-4">

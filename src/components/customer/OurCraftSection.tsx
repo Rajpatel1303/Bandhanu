@@ -4,47 +4,89 @@ import { ArrowRight } from 'lucide-react';
 import { BandhaniBloomInteractive } from './BandhaniBloomInteractive';
 
 export const OurCraftSection: React.FC = () => {
-  const { setCurrentPage } = useStore();
+  const { siteContent, setCurrentPage, theme } = useStore();
+
+  const craftStyles = theme?.sections?.craft;
+  const sectionBg = craftStyles?.bg || undefined;
+  const cardBg = craftStyles?.cardBg || undefined;
+  const titleColor = craftStyles?.titleColor || undefined;
+  const textColor = craftStyles?.textColor || undefined;
+
+  const craftJourney = siteContent?.craftJourney;
+
+  // Check section toggle
+  if (siteContent?.toggles && siteContent.toggles.showCraftJourney === false) {
+    return null;
+  }
 
   const handleDiscoverCraft = () => {
     setCurrentPage('about');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const steps = [
+  const defaultStages = [
     {
-      title: 'Tying',
-      subtitle: 'Every knot tells a story',
+      step: '01',
+      title: 'Tying (Bandhana)',
+      subtitle: 'Every minute knot tells a story',
       image: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80',
     },
     {
-      title: 'Dyeing',
+      step: '02',
+      title: 'Dyeing (Rangai)',
       subtitle: 'Natural colours, lasting beauty',
       image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80',
     },
     {
-      title: 'The Final Fabric',
-      subtitle: 'A masterpiece in every fold',
+      step: '03',
+      title: 'The Final Fabric (Khilana)',
+      subtitle: 'A crinkled bloom in every fold',
       image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
     },
   ];
 
+  const stagesToRender =
+    craftJourney?.stages && craftJourney.stages.length > 0
+      ? craftJourney.stages.map((st, i) => ({
+          step: st.step || `0${i + 1}`,
+          title: st.title || st.phase || defaultStages[i % defaultStages.length]?.title || 'Bandhani Craft',
+          subtitle: st.subtitle || st.description || defaultStages[i % defaultStages.length]?.subtitle || '',
+          image: st.image || defaultStages[i % defaultStages.length]?.image || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80'
+        }))
+      : defaultStages;
+
+  const badge = craftJourney?.badge || 'Our Craft';
+  const heading = craftJourney?.heading || 'The Art Behind Every Dot';
+  const description =
+    craftJourney?.description ||
+    'From tying tiny knots to dyeing and opening, each Bandhani textile takes time, patience and skilled hands. We work with traditional methods, keeping the heritage alive.';
+
   return (
-    <section id="our-craft-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 space-y-12">
-      {/* Top Section: Story and 3 Step Cards */}
+    <section
+      id="our-craft-section"
+      style={{ backgroundColor: sectionBg }}
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 space-y-12 transition-colors duration-300"
+    >
+      {/* Top Section: Story and Step Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* Left Column: Narrative & CTA */}
         <div className="lg:col-span-4 space-y-4 text-left">
           <span className="text-[10px] sm:text-[11px] font-semibold tracking-[0.22em] text-[#6E6259] uppercase block">
-            Our Craft
+            {badge}
           </span>
 
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#241E1C] leading-tight">
-            The Art Behind Every Dot
+          <h2
+            style={{ color: titleColor }}
+            className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#241E1C] leading-tight"
+          >
+            {heading}
           </h2>
 
-          <p className="text-xs sm:text-sm text-[#6E6259] leading-relaxed font-normal">
-            From tying tiny knots to dyeing and opening, each Bandhani textile takes time, patience and skilled hands. We work with traditional methods, keeping the heritage alive.
+          <p
+            style={{ color: textColor }}
+            className="text-xs sm:text-sm text-[#6E6259] leading-relaxed font-normal"
+          >
+            {description}
           </p>
 
           <div className="pt-2">
@@ -58,21 +100,33 @@ export const OurCraftSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: 3 Process Visual Cards */}
+        {/* Right Column: Dynamic Process Visual Cards */}
         <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-          {steps.map((step, idx) => (
+          {stagesToRender.slice(0, 3).map((step, idx) => (
             <div key={idx} className="flex flex-col group">
-              <div className="aspect-[4/3] overflow-hidden bg-[#F5EFE6] border border-[#E2D7C7]/50 mb-3">
+              <div
+                style={{ backgroundColor: cardBg }}
+                className="aspect-[4/3] overflow-hidden bg-[#F5EFE6] border border-[#E2D7C7]/50 mb-3"
+              >
                 <img
                   src={step.image}
                   alt={step.title}
                   className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
               </div>
-              <h3 className="font-serif font-bold text-base text-[#241E1C] group-hover:text-[#4A121A] transition-colors">
-                {step.title}
-              </h3>
-              <p className="text-xs text-[#6E6259] mt-0.5">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono font-bold text-[#4A121A]">{step.step}</span>
+                <h3
+                  style={{ color: titleColor }}
+                  className="font-serif font-bold text-base text-[#241E1C] group-hover:text-[#4A121A] transition-colors truncate"
+                >
+                  {step.title}
+                </h3>
+              </div>
+              <p
+                style={{ color: textColor }}
+                className="text-xs text-[#6E6259] mt-0.5 line-clamp-2"
+              >
                 {step.subtitle}
               </p>
             </div>

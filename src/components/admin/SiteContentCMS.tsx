@@ -22,12 +22,40 @@ export const SiteContentCMS: React.FC = () => {
   const { siteContent, updateSiteContent } = useStore();
 
   const [activeTab, setActiveTab] = useState<'announcement' | 'hero' | 'craft' | 'about' | 'contact' | 'toggles'>('craft');
-  const [formData, setFormData] = useState<UniversalSiteContent>(siteContent);
+  const [formData, setRawFormData] = useState<UniversalSiteContent>(siteContent);
   const [savedToast, setSavedToast] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Sync state if store content changes externally
+  React.useEffect(() => {
+    setRawFormData(siteContent);
+  }, [siteContent]);
+
+  const updateTimeoutRef = React.useRef<any>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Wrapper so ANY input modification immediately updates store & localStorage in real time
+  const setFormData: React.Dispatch<React.SetStateAction<UniversalSiteContent>> = (nextOrFn) => {
+    setRawFormData((prev) => {
+      const next = typeof nextOrFn === 'function' ? nextOrFn(prev) : nextOrFn;
+      if (updateTimeoutRef.current) clearTimeout(updateTimeoutRef.current);
+      updateTimeoutRef.current = setTimeout(() => {
+        updateSiteContent(next);
+      }, 40);
+      return next;
+    });
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (updateTimeoutRef.current) clearTimeout(updateTimeoutRef.current);
     setIsSaving(true);
 
     try {

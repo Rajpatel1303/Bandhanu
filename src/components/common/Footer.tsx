@@ -3,10 +3,16 @@ import { useStore } from '../../context/StoreContext';
 import { InstagramIcon } from './InstagramIcon';
 
 export const Footer: React.FC = () => {
-  const { setCurrentPage, setSelectedProductId, setSelectedCategory, theme } = useStore();
+  const { setCurrentPage, setSelectedProductId, setSelectedCategory, profile, theme } = useStore();
   const footerStyles = theme?.sections?.footer;
   const footerBg = footerStyles?.bg || undefined;
   const footerText = footerStyles?.textColor || undefined;
+
+  const instagramUrl = profile.instagramHandle
+    ? (profile.instagramHandle.startsWith('http')
+        ? profile.instagramHandle
+        : `https://instagram.com/${profile.instagramHandle.replace('@', '')}`)
+    : 'https://instagram.com';
 
   const handleNav = (page: 'home' | 'catalogue' | 'about' | 'contact') => {
     setSelectedProductId(null);
@@ -37,10 +43,10 @@ export const Footer: React.FC = () => {
             className="cursor-pointer text-center md:text-left select-none"
           >
             <span className="font-serif font-bold text-2xl sm:text-3xl tracking-[0.14em] text-[#FBF8F3] block leading-none">
-              BANDHANU
+              {profile.businessName || 'BANDHANU'}
             </span>
             <span className="block text-[8.5px] tracking-[0.25em] text-[#D8C7B5] uppercase font-medium mt-1">
-              Tie and Dye Textile
+              {profile.tagline || 'Tie and Dye Textile'}
             </span>
           </div>
 
@@ -82,7 +88,7 @@ export const Footer: React.FC = () => {
           <div className="flex flex-col md:items-end items-center gap-2.5">
             <div className="flex items-center space-x-3 text-[#F5EFE6]/80">
               <a
-                href="https://instagram.com/bandhanu"
+                href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-white transition-colors p-1"
@@ -103,7 +109,7 @@ export const Footer: React.FC = () => {
               </a>
             </div>
             <p className="text-[11px] text-[#D8C7B5]/80 font-normal">
-              © 2026 Bandhanu. All rights reserved.
+              © {new Date().getFullYear()} {profile.businessName || 'Bandhanu'}. All rights reserved.
             </p>
           </div>
         </div>

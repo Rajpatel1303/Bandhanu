@@ -120,6 +120,11 @@ export const ThemeCustomizer: React.FC = () => {
   const [savedToast, setSavedToast] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Sync with store theme updates
+  React.useEffect(() => {
+    setFormData(theme);
+  }, [theme]);
+
   const handleGlobalColorChange = (key: keyof Omit<CustomThemeSettings, 'sections'>, value: string) => {
     const updated = {
       ...formData,

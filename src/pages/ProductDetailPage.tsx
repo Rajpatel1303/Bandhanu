@@ -25,7 +25,8 @@ export const ProductDetailPage: React.FC = () => {
     isWishlisted,
     toggleWishlist,
     addToCart,
-    setSelectedCategory
+    setSelectedCategory,
+    profile
   } = useStore();
 
   const product = products.find((p) => p.id === selectedProductId) || products[0];
@@ -162,21 +163,21 @@ export const ProductDetailPage: React.FC = () => {
                 <div className="w-6 h-6 rounded-full bg-[#F5EFE6] border border-[#D8C7B5] flex items-center justify-center text-[#4A121A] shrink-0">
                   <span className="text-xs">🏷️</span>
                 </div>
-                <span className="font-medium">Handcrafted in Kutch</span>
+                <span className="font-medium">Handcrafted in {profile.city || 'Kutch'}</span>
               </div>
 
               <div className="flex items-center gap-3 text-xs text-[#241E1C]">
                 <div className="w-6 h-6 rounded-full bg-[#F5EFE6] border border-[#D8C7B5] flex items-center justify-center text-[#4A121A] shrink-0">
                   <span className="text-xs">🧵</span>
                 </div>
-                <span className="font-medium">Pure Silk</span>
+                <span className="font-medium">{product.fabric || 'Pure Silk'}</span>
               </div>
 
               <div className="flex items-center gap-3 text-xs text-[#241E1C]">
                 <div className="w-6 h-6 rounded-full bg-[#F5EFE6] border border-[#D8C7B5] flex items-center justify-center text-[#4A121A] shrink-0">
                   <span className="text-xs">🌿</span>
                 </div>
-                <span className="font-medium">Natural Dyes</span>
+                <span className="font-medium">{product.craftTechnique || 'Authentic Bandhej'}</span>
               </div>
             </div>
 

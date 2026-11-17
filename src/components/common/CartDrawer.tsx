@@ -29,7 +29,8 @@ export const CartDrawer: React.FC = () => {
       )
       .join('\n');
 
-    const message = `Hello Bandhanu Concierge! 👋
+    const brandName = profile.businessName || 'Bandhanu';
+    const message = `Hello ${brandName} Concierge! 👋
 
 I would like to place an order for the following handcrafted pieces:
 

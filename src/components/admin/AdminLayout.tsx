@@ -27,8 +27,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     categories,
     enquiryLogs,
     profile,
+    dbStatus,
     resetToDemo,
-    logoutStudio
+    logoutStudio,
+    setActiveView
   } = useStore();
 
   const navItems: { tab: AdminTab; label: string; icon: React.ElementType; badge?: string | number }[] = [
@@ -55,11 +57,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <div>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <h1 className="font-serif font-bold text-xs sm:text-base text-heritage-gold tracking-wide truncate max-w-[150px] sm:max-w-none">
-                Bandhanu Studio Atelier
+                {profile.businessName || 'Bandhanu'} Studio Atelier
               </h1>
-              <span className="px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] sm:text-[10px] font-bold border border-emerald-500/30 whitespace-nowrap">
-                Supabase Live Sync
-              </span>
+              {dbStatus === 'connected' ? (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold border border-emerald-500/30 whitespace-nowrap flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Cloud Live Sync</span>
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] font-bold border border-teal-500/30 whitespace-nowrap flex items-center gap-1" title="Changes persist automatically in database storage">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                  <span>Database: Active</span>
+                </span>
+              )}
             </div>
             <p className="text-[9px] sm:text-[10px] text-gray-400 hidden xs:block truncate">
               Catalogue, CMS & WhatsApp Intelligence
@@ -82,17 +92,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             </div>
           </div>
 
-          <a
-            href="#/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-[11px] sm:text-xs font-semibold transition-all shrink-0"
-            title="Preview Customer Store in New Tab"
+          <button
+            onClick={() => setActiveView('store')}
+            className="flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 rounded-full bg-heritage-gold/20 hover:bg-heritage-gold/30 text-heritage-gold text-[11px] sm:text-xs font-semibold transition-all shrink-0 cursor-pointer"
+            title="View Storefront"
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span className="hidden xs:inline">Preview Store</span>
-            <ExternalLink className="w-3 h-3 text-gray-400" />
-          </a>
+            <span>View Store</span>
+          </button>
 
           <button
             onClick={logoutStudio}

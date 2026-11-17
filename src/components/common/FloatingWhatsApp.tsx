@@ -11,7 +11,8 @@ export const FloatingWhatsApp: React.FC = () => {
     return null;
   }
 
-  const defaultMsg = 'Hello Bandhanu! I am browsing your handcrafted Bandhani website and would like some assistance.';
+  const brandName = profile.businessName || 'Bandhanu';
+  const defaultMsg = `Hello ${brandName}! I am browsing your handcrafted Bandhani website and would like some assistance.`;
   const chatUrl = getWhatsAppDirectUrl(profile.whatsappNumber, defaultMsg);
 
   return (
@@ -32,11 +33,11 @@ export const FloatingWhatsApp: React.FC = () => {
             </div>
             <div>
               <div className="text-xs font-bold text-heritage-charcoal dark:text-white">
-                Bandhanu Artisan Desk
+                {brandName} Artisan Desk
               </div>
               <div className="text-[10px] text-emerald-600 flex items-center gap-1 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live Bhadli, Kutch Studio
+                Live {profile.city || 'Bhadli'}, {profile.state || 'Kutch'} Studio
               </div>
             </div>
           </div>

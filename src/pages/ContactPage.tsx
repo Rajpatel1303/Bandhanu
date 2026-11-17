@@ -38,7 +38,7 @@ const FAQS = [
 ];
 
 export const ContactPage: React.FC = () => {
-  const { profile, setCurrentPage } = useStore();
+  const { profile, siteContent, setCurrentPage } = useStore();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -158,7 +158,7 @@ Looking forward to hearing from your master artisans!`;
                       {profile.address}
                     </p>
                     <a
-                      href={`https://maps.google.com/?q=${encodeURIComponent(profile.address)}`}
+                      href={siteContent?.contact?.mapUrl || `https://maps.google.com/?q=${encodeURIComponent(profile.address)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-xs text-heritage-crimson dark:text-heritage-gold font-bold mt-2 hover:underline"
@@ -230,7 +230,7 @@ Looking forward to hearing from your master artisans!`;
                       Visiting & Consultation Hours
                     </strong>
                     <p className="text-heritage-charcoal/70 dark:text-gray-400 mt-0.5">
-                      Monday to Saturday: 10:30 AM – 8:00 PM IST
+                      {siteContent?.contact?.visitingHours || 'Monday to Saturday: 10:30 AM – 8:00 PM IST'}
                     </p>
                     <span className="text-[11px] text-heritage-gold font-medium">
                       Studio visits by prior appointment recommended

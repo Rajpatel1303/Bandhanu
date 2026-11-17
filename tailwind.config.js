@@ -9,11 +9,11 @@ export default {
     extend: {
       colors: {
         heritage: {
-          maroon: '#4A121A',
-          maroonDark: '#380D13',
-          maroonLight: '#5C1520',
-          crimson: '#4A121A', // Aligned with the deep maroon brand
-          ruby: '#380D13',
+          maroon: 'var(--brand-maroon, #4A121A)',
+          maroonDark: 'var(--brand-maroon-dark, #380D13)',
+          maroonLight: 'var(--brand-maroon, #4A121A)',
+          crimson: 'var(--brand-maroon, #4A121A)',
+          ruby: 'var(--brand-maroon-dark, #380D13)',
           terracotta: '#A6432D',
           marigold: '#F4A228',
           saffron: '#D97706',
@@ -21,15 +21,15 @@ export default {
           indigo: '#1E2B45',
           peacock: '#0D5C75',
           emerald: '#1A5336',
-          sand: '#F5EFE6',
-          sandBorder: '#E2D7C7',
+          sand: 'var(--brand-sand, #F5EFE6)',
+          sandBorder: 'var(--brand-sand-border, #E2D7C7)',
           sandLight: '#FAF6F0',
-          cream: '#FBF8F3',
-          silk: '#F5EFE6',
+          cream: 'var(--brand-cream, #FBF8F3)',
+          silk: 'var(--brand-sand, #F5EFE6)',
           gold: '#C29D59',
           antiqueGold: '#9E7B3B',
-          charcoal: '#241E1C',
-          muted: '#6E6259',
+          charcoal: 'var(--brand-charcoal, #241E1C)',
+          muted: 'var(--brand-muted, #6E6259)',
           darkSurface: '#191514',
           darkCard: '#241F1E'
         }

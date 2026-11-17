@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export const DashboardOverview: React.FC = () => {
-  const { products, categories, enquiryLogs, profile, setAdminTab, setSelectedProductId, setActiveView } = useStore();
+  const { products, categories, enquiryLogs, profile, setAdminTab, navigateToProduct } = useStore();
   const [hoveredDataPoint, setHoveredDataPoint] = useState<number | null>(null);
 
   // Key Analytics Calculations
@@ -475,10 +475,7 @@ export const DashboardOverview: React.FC = () => {
               </div>
 
               <button
-                onClick={() => {
-                  setSelectedProductId(p.id);
-                  setActiveView('store');
-                }}
+                onClick={() => navigateToProduct(p.id)}
                 className="px-2.5 py-1 rounded-lg border border-heritage-gold/30 hover:bg-heritage-sand/50 text-[10px] font-semibold shrink-0"
               >
                 Inspect
@@ -541,10 +538,7 @@ export const DashboardOverview: React.FC = () => {
                   </td>
                   <td className="py-3 px-3 text-right">
                     <button
-                      onClick={() => {
-                        setSelectedProductId(p.id);
-                        setActiveView('store');
-                      }}
+                      onClick={() => navigateToProduct(p.id)}
                       className="px-2.5 py-1 rounded-lg border border-heritage-gold/30 hover:bg-heritage-sand/50 text-[11px] font-medium"
                     >
                       View Live

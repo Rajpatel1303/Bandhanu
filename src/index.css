@@ -89,3 +89,52 @@
   background-size: 24px 24px;
   background-position: 0 0, 12px 12px;
 }
+
+/* Dynamic Theme Overrides - Allows Theme Customizer to live-recolor all website elements */
+.bg-\[\#4A121A\] {
+  background-color: var(--brand-maroon, #4A121A) !important;
+}
+.hover\:bg-\[\#380D13\]:hover {
+  background-color: var(--brand-maroon-dark, #380D13) !important;
+}
+.text-\[\#4A121A\] {
+  color: var(--brand-maroon, #4A121A) !important;
+}
+.group:hover .group-hover\:text-\[\#4A121A\] {
+  color: var(--brand-maroon, #4A121A) !important;
+}
+.hover\:text-\[\#4A121A\]:hover {
+  color: var(--brand-maroon, #4A121A) !important;
+}
+.border-\[\#4A121A\] {
+  border-color: var(--brand-maroon, #4A121A) !important;
+}
+.hover\:border-\[\#4A121A\]:hover {
+  border-color: var(--brand-maroon, #4A121A) !important;
+}
+.fill-\[\#4A121A\] {
+  fill: var(--brand-maroon, #4A121A) !important;
+}
+
+.bg-\[\#FBF8F3\] {
+  background-color: var(--brand-cream, #FBF8F3) !important;
+}
+.bg-\[\#F5EFE6\] {
+  background-color: var(--brand-sand, #F5EFE6) !important;
+}
+.border-\[\#E2D7C7\] {
+  border-color: var(--brand-sand-border, #E2D7C7) !important;
+}
+.border-\[\#E2D7C7\]\/50, .border-\[\#E2D7C7\]\/60 {
+  border-color: var(--brand-sand-border, #E2D7C7) !important;
+}
+
+.text-\[\#241E1C\] {
+  color: var(--brand-charcoal, #241E1C) !important;
+}
+.hover\:text-\[\#241E1C\]:hover {
+  color: var(--brand-charcoal, #241E1C) !important;
+}
+.text-\[\#6E6259\] {
+  color: var(--brand-muted, #6E6259) !important;
+}

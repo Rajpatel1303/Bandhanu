@@ -21,7 +21,7 @@ import {
   INITIAL_BUSINESS_PROFILE,
   INITIAL_ENQUIRIES_LOG
 } from '../data/initialData';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { getWhatsAppDirectUrl, openWhatsAppDirect } from '../utils/whatsapp';
 
 export const INITIAL_SITE_CONTENT: UniversalSiteContent = {
@@ -189,6 +189,8 @@ interface StoreContextType {
   profile: BusinessProfile;
   enquiryLogs: EnquiryLog[];
   siteContent: UniversalSiteContent;
+  dbStatus: 'connected' | 'local';
+  setSupabaseCredentials: (url: string, anonKey: string) => Promise<boolean>;
 
   // Content CMS
   updateSiteContent: (content: UniversalSiteContent) => Promise<void>;
@@ -430,6 +432,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [wishlist]);
 
   // Dynamic Theme Management
+  const [dbStatus, setDbStatus] = useState<'connected' | 'local'>('local');
+
+  const setSupabaseCredentials = async (url: string, anonKey: string): Promise<boolean> => {
+    try {
+      localStorage.setItem('bandhanu_supabase_url', url.trim());
+      localStorage.setItem('bandhanu_supabase_anon_key', anonKey.trim());
+      window.location.reload();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const theme: CustomThemeSettings = siteContent.theme || INITIAL_SITE_CONTENT.theme!;
 
   const updateTheme = (newTheme: Partial<CustomThemeSettings>) => {
@@ -447,6 +462,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     setSiteContent(updatedContent);
     localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(updatedContent));
+
+    if (isSupabaseConfigured) {
+      (async () => {
+        try {
+          const { error } = await supabase
+            .from('site_content')
+            .upsert({ key: 'theme', value: merged, updated_at: new Date().toISOString() });
+          if (!error) setDbStatus('connected');
+        } catch {
+          // safe fallback
+        }
+      })();
+    }
   };
 
   const resetTheme = () => {
@@ -479,8 +507,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [theme]);
 
-  // Load live data from Supabase Cloud Database
+  // Load live data from Supabase Cloud Database (when valid credentials configured)
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setDbStatus('local');
+      return;
+    }
+
     const fetchFromSupabase = async () => {
       try {
         // 1. Fetch Categories & Subcategories
@@ -488,23 +521,28 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .from('categories')
           .select('*, sub_categories(*)');
 
-        if (!catErr && dbCategories && dbCategories.length > 0) {
-          const mappedCats: Category[] = dbCategories.map((c: any) => ({
-            id: c.id,
-            name: c.name,
-            slug: c.slug,
-            description: c.description || '',
-            image: c.image || '',
-            badge: c.badge || undefined,
-            isActive: c.is_active ?? true,
-            subCategories: (c.sub_categories || []).map((s: any) => ({
-              id: s.id,
-              name: s.name,
-              slug: s.slug,
-              description: s.description
-            }))
-          }));
-          setCategories(mappedCats);
+        if (!catErr && dbCategories) {
+          setDbStatus('connected');
+          if (dbCategories.length > 0) {
+            const mappedCats: Category[] = dbCategories.map((c: any) => ({
+              id: c.id,
+              name: c.name,
+              slug: c.slug,
+              description: c.description || '',
+              image: c.image || '',
+              badge: c.badge || undefined,
+              isActive: c.is_active ?? true,
+              subCategories: (c.sub_categories || []).map((s: any) => ({
+                id: s.id,
+                name: s.name,
+                slug: s.slug,
+                description: s.description
+              }))
+            }));
+            setCategories(mappedCats);
+          }
+        } else {
+          setDbStatus('local');
         }
 
         // 2. Fetch Products
@@ -710,14 +748,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }));
     }
 
-    try {
-      for (const [key, val] of Object.entries(newContent)) {
-        await supabase
-          .from('site_content')
-          .upsert({ key, value: val, updated_at: new Date().toISOString() });
+    if (isSupabaseConfigured) {
+      try {
+        for (const [key, val] of Object.entries(newContent)) {
+          await supabase
+            .from('site_content')
+            .upsert({ key, value: val, updated_at: new Date().toISOString() });
+        }
+      } catch (err) {
+        console.warn('Cloud sync notice:', err);
       }
-    } catch (err) {
-      console.error('Supabase site content sync error:', err);
     }
   };
 
@@ -881,15 +921,83 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addBanner = (data: Omit<Banner, 'id'>) => {
     const newBanner: Banner = { ...data, id: `banner-${Date.now()}` };
     setBanners(prev => [...prev, newBanner]);
+    if (newBanner.isActive) {
+      updateSiteContent({
+        ...siteContent,
+        hero: {
+          ...siteContent.hero,
+          heading: newBanner.title,
+          description: newBanner.subtitle,
+          primaryBtnText: newBanner.ctaText,
+          badge: newBanner.badge,
+          heroImage: newBanner.imageUrl || siteContent.hero.heroImage
+        }
+      });
+    }
   };
   const deleteBanner = (id: string) => setBanners(prev => prev.filter(b => b.id !== id));
   const toggleBannerStatus = (id: string) => {
-    setBanners(prev => prev.map(b => (b.id === id ? { ...b, isActive: !b.isActive } : b)));
+    setBanners(prev => {
+      const next = prev.map(b => (b.id === id ? { ...b, isActive: !b.isActive } : b));
+      const newlyActive = next.find(b => b.id === id && b.isActive);
+      if (newlyActive) {
+        updateSiteContent({
+          ...siteContent,
+          hero: {
+            ...siteContent.hero,
+            heading: newlyActive.title,
+            description: newlyActive.subtitle,
+            primaryBtnText: newlyActive.ctaText,
+            badge: newlyActive.badge,
+            heroImage: newlyActive.imageUrl || siteContent.hero.heroImage
+          }
+        });
+      }
+      return next;
+    });
   };
 
   // Profile Actions
   const updateProfile = (updates: Partial<BusinessProfile>) => {
-    setProfile(prev => ({ ...prev, ...updates }));
+    setProfile(prev => {
+      const updated = { ...prev, ...updates };
+      localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(updated));
+      return updated;
+    });
+
+    // Synchronize to siteContent.contact so CMS and Frontend are 100% aligned
+    setSiteContent(prev => {
+      const updatedContent: UniversalSiteContent = {
+        ...prev,
+        contact: {
+          ...prev.contact,
+          businessName: updates.businessName ?? prev.contact.businessName,
+          tagline: updates.tagline ?? prev.contact.tagline,
+          address: updates.address ?? prev.contact.address,
+          whatsappNumber: updates.whatsappNumber ?? prev.contact.whatsappNumber,
+          displayPhone: updates.displayPhone ?? prev.contact.displayPhone,
+          email: updates.email ?? prev.contact.email,
+          instagramHandle: updates.instagramHandle ?? prev.contact.instagramHandle
+        }
+      };
+      localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(updatedContent));
+
+      // Attempt cloud sync if connected
+      if (isSupabaseConfigured) {
+        (async () => {
+          try {
+            const { error } = await supabase
+              .from('site_content')
+              .upsert({ key: 'contact', value: updatedContent.contact, updated_at: new Date().toISOString() });
+            if (!error) setDbStatus('connected');
+          } catch {
+            // safe fallback
+          }
+        })();
+      }
+
+      return updatedContent;
+    });
   };
 
   // WhatsApp Enquiry Flow
@@ -1034,6 +1142,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         profile,
         enquiryLogs,
         siteContent,
+        dbStatus,
+        setSupabaseCredentials,
         updateSiteContent,
         theme,
         updateTheme,

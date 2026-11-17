@@ -10,6 +10,9 @@ export const FeaturedCategories: React.FC = () => {
   const titleColor = catStyles?.titleColor || undefined;
   const cardBg = catStyles?.cardBg || undefined;
 
+  // Only display active categories defined in CategoryManager
+  const activeCategories = categories.filter((c) => c.isActive !== false);
+
   const handleCategoryClick = (slug: string) => {
     setSelectedCategory(slug);
     setCurrentPage('catalogue');
@@ -21,6 +24,8 @@ export const FeaturedCategories: React.FC = () => {
     setCurrentPage('catalogue');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  if (activeCategories.length === 0) return null;
 
   return (
     <section
@@ -52,9 +57,9 @@ export const FeaturedCategories: React.FC = () => {
         </div>
       </div>
 
-      {/* 4 Category Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {categories.slice(0, 4).map((cat) => (
+      {/* Dynamic Category Cards Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {activeCategories.slice(0, 8).map((cat) => (
           <div
             key={cat.id}
             onClick={() => handleCategoryClick(cat.slug)}
@@ -68,6 +73,11 @@ export const FeaturedCategories: React.FC = () => {
                 alt={cat.name}
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
               />
+              {cat.badge && (
+                <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-[#4A121A]/80 text-[#F5EFE6] text-[10px] font-semibold tracking-wider uppercase backdrop-blur-xs">
+                  {cat.badge}
+                </span>
+              )}
             </div>
 
             {/* Content info below image */}
@@ -76,7 +86,7 @@ export const FeaturedCategories: React.FC = () => {
                 <h3 className="font-serif font-bold text-base sm:text-lg text-[#241E1C] group-hover:text-[#4A121A] transition-colors">
                   {cat.name}
                 </h3>
-                <p className="text-xs text-[#6E6259] mt-0.5 font-normal">
+                <p className="text-xs text-[#6E6259] mt-0.5 font-normal line-clamp-1">
                   {cat.description}
                 </p>
               </div>

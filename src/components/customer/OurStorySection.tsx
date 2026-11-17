@@ -1,15 +1,22 @@
 import React from 'react';
 import { useStore } from '../../context/StoreContext';
-import { ArrowRight, MapPin } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export const OurStorySection: React.FC = () => {
-  const { setCurrentPage, theme } = useStore();
+  const { siteContent, profile, setCurrentPage, theme } = useStore();
   const storyStyles = theme?.sections?.story;
   const sectionBg = storyStyles?.bg || undefined;
   const cardBg = storyStyles?.cardBg || undefined;
   const titleColor = storyStyles?.titleColor || undefined;
   const textColor = storyStyles?.textColor || undefined;
   const btnBg = storyStyles?.btnBg || undefined;
+
+  const about = siteContent?.about;
+  const badge = about?.badge || 'Our Story';
+  const headline = about?.headline || 'Rooted in Bhadli, Kutch';
+  const storyText =
+    about?.storyParagraph1 ||
+    `${profile.businessName || 'Bandhanu'} celebrates the traditional art of Bandhani through handcrafted textiles that bring heritage and contemporary design together. Every piece reflects the skill, patience and dedication of the artisans who keep this craft alive.`;
 
   const handleReadStory = () => {
     setCurrentPage('about');
@@ -39,21 +46,21 @@ export const OurStorySection: React.FC = () => {
           {/* Center Column: Narrative & Button */}
           <div className="lg:col-span-5 p-6 sm:p-10 lg:p-12 space-y-4 text-left">
             <span className="text-[10px] sm:text-[11px] font-semibold tracking-[0.22em] text-[#6E6259] uppercase block">
-              Our Story
+              {badge}
             </span>
 
             <h2
               style={{ color: titleColor }}
               className="text-2xl sm:text-3xl font-serif text-[#241E1C] leading-snug"
             >
-              Rooted in Bhadli, Kutch
+              {headline}
             </h2>
 
             <p
               style={{ color: textColor }}
               className="text-xs sm:text-sm text-[#6E6259] leading-relaxed font-normal"
             >
-              Bandhanu celebrates the traditional art of Bandhani through handcrafted textiles that bring heritage and contemporary design together. Every piece reflects the skill, patience and dedication of the artisans who keep this craft alive.
+              {storyText}
             </p>
 
             <div className="pt-2">
@@ -110,10 +117,10 @@ export const OurStorySection: React.FC = () => {
                 <div className="w-2 h-2 rounded-full bg-[#4A121A] animate-ping" />
                 <div className="text-left">
                   <span className="block font-serif font-bold text-xs text-[#241E1C] leading-none">
-                    Bhadli
+                    {profile.city || 'Bhadli'}
                   </span>
                   <span className="block text-[9px] text-[#6E6259] leading-none mt-0.5">
-                    Kutch, Gujarat
+                    {profile.state || 'Kutch, Gujarat'}
                   </span>
                 </div>
               </div>
