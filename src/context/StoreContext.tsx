@@ -23,6 +23,7 @@ import {
 } from '../data/initialData';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { getWhatsAppDirectUrl, openWhatsAppDirect } from '../utils/whatsapp';
+import { useNotification } from './NotificationContext';
 
 export const INITIAL_SITE_CONTENT: UniversalSiteContent = {
   announcement: {
@@ -256,6 +257,8 @@ try {
 } catch {}
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { notify } = useNotification();
+
   // Navigation & View States
   const [activeView, setActiveView] = useState<ActiveView>('store');
   const [adminTab, setAdminTab] = useState<AdminTab>('analytics');
@@ -332,10 +335,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return [...prev, { product, quantity, selectedColor: color }];
     });
     setIsCartOpen(true);
+    notify.royal('Added to Bag', `${product.title} (${color}) added to your bag.`, {
+      thumbnail: product.images[0],
+      action: {
+        label: 'View Bag',
+        onClick: () => setIsCartOpen(true)
+      }
+    });
   };
 
   const removeFromCart = (productId: string) => {
+    const item = cart.find(i => i.product.id === productId);
     setCart(prev => prev.filter(item => item.product.id !== productId));
+    if (item) {
+      notify.info('Removed from Bag', `${item.product.title} was removed.`);
+    }
   };
 
   const updateCartQuantity = (productId: string, delta: number) => {
@@ -472,6 +486,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     setSiteContent(updatedContent);
     localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(updatedContent));
+    notify.success('Theme Applied', 'Palette colors updated across the storefront.');
 
     if (isSupabaseConfigured) {
       (async () => {
@@ -495,6 +510,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     setSiteContent(updatedContent);
     localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(updatedContent));
+    notify.info('Theme Reset', 'Restored default Bandhanu heritage palette.');
   };
 
   // Sync custom theme colors to CSS custom properties and document body
@@ -686,7 +702,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return;
       }
 
-      setCurrentPage('home');
+      // Unrecognized route fallback to custom 404 page
+      setCurrentPage('404');
+      setSelectedProductId(null);
     };
 
     parseRouteFromHash();
@@ -733,9 +751,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Wishlist Functions
   const toggleWishlist = (productId: string) => {
+    const isSaved = wishlist.includes(productId);
+    const prod = products.find(p => p.id === productId);
+    const title = prod ? prod.title : 'Piece';
     setWishlist(prev =>
-      prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]
+      isSaved ? prev.filter(id => id !== productId) : [...prev, productId]
     );
+    if (isSaved) {
+      notify.info('Wishlist Updated', `${title} removed from your wishlist.`);
+    } else {
+      notify.royal('Saved to Wishlist ❤️', `${title} saved to your curated wishlist.`);
+    }
   };
 
   const isWishlisted = (productId: string) => wishlist.includes(productId);
@@ -743,6 +769,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Content CMS Update with Supabase Cloud Sync
   const updateSiteContent = async (newContent: UniversalSiteContent) => {
     setSiteContent(newContent);
+    notify.success('CMS Content Saved', 'Storefront sections and copy updated.');
 
     // Sync profile
     if (newContent.contact) {
@@ -812,6 +839,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       console.error('Supabase product insert error:', err);
     }
 
+    notify.success('Piece Added', `"${newProduct.title}" has been added to your catalogue.`);
     return newProduct;
   };
 
@@ -847,6 +875,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (err) {
       console.error('Supabase product update error:', err);
     }
+    notify.success('Piece Updated', 'All specifications and changes have been saved.');
   };
 
   const deleteProduct = async (id: string) => {
@@ -859,6 +888,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (err) {
       console.error('Supabase product delete error:', err);
     }
+    notify.info('Piece Removed', 'The item was deleted from your catalogue.');
   };
 
   const toggleFeatured = async (id: string) => {
@@ -893,7 +923,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (err) {
       console.error('Supabase category insert error:', err);
     }
-
+    notify.success('Category Created', `Category "${newCategory.name}" is now live.`);
     return newCategory;
   };
 
@@ -915,6 +945,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (err) {
       console.error('Supabase category update error:', err);
     }
+    notify.success('Category Updated', 'Category details and subcategories saved.');
   };
 
   const deleteCategory = async (id: string) => {
@@ -924,6 +955,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (err) {
       console.error('Supabase category delete error:', err);
     }
+    notify.info('Category Removed', 'The category was deleted.');
   };
 
   // Banner Actions
@@ -1076,6 +1108,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       message += `\n✦ Knots: ${product.knotCount}`;
     }
 
+    notify.royal('Opening WhatsApp Concierge', `Connecting you to reserve ${product.title}...`);
     // Direct jump into WhatsApp chat section (skips api.whatsapp.com landing page)
     openWhatsAppDirect(profile.whatsappNumber, message);
   };
@@ -1089,28 +1122,37 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setEnquiryLogs(INITIAL_ENQUIRIES_LOG);
     setSiteContent(INITIAL_SITE_CONTENT);
     localStorage.clear();
+    notify.info('Catalogue Reset', 'All cached data and state restored to default.');
   };
 
   const clearAllProducts = () => {
     setProducts([]);
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify([]));
+    notify.warning('Catalogue Emptied', 'All products have been cleared from database.');
   };
 
   const exportDatabase = () => {
     const data = { products, categories, banners, profile, enquiryLogs, siteContent };
+    notify.success('Catalogue Exported', 'JSON database backup downloaded.');
     return JSON.stringify(data, null, 2);
   };
 
   const importDatabase = (jsonString: string): boolean => {
     try {
       const data = JSON.parse(jsonString);
-      if (data.products) setProducts(data.products);
-      if (data.categories) setCategories(data.categories);
-      if (data.banners) setBanners(data.banners);
-      if (data.profile) setProfile(data.profile);
-      if (data.siteContent) setSiteContent(data.siteContent);
-      return true;
+      if (data.products && Array.isArray(data.products)) {
+        setProducts(data.products);
+        if (data.categories) setCategories(data.categories);
+        if (data.banners) setBanners(data.banners);
+        if (data.profile) setProfile(data.profile);
+        if (data.siteContent) setSiteContent(data.siteContent);
+        notify.success('Database Restored', 'All products, categories, and settings imported.');
+        return true;
+      }
+      notify.error('Invalid Format', 'JSON file does not contain valid Bandhanu backup data.');
+      return false;
     } catch {
+      notify.error('Import Failed', 'Unable to parse JSON backup file.');
       return false;
     }
   };

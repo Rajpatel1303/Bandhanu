@@ -1,5 +1,6 @@
 import React from 'react';
 import { useStore } from '../../context/StoreContext';
+import { useNotification } from '../../context/NotificationContext';
 import { AdminTab } from '../../types';
 import {
   BarChart3,
@@ -20,6 +21,7 @@ interface AdminLayoutProps {
 }
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+  const { confirm: customConfirm } = useNotification();
   const {
     adminTab,
     setAdminTab,
@@ -190,8 +192,15 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             </p>
             <div className="pt-1">
               <button
-                onClick={() => {
-                  if (confirm('Reset entire catalogue to factory demo data?')) {
+                onClick={async () => {
+                  const agreed = await customConfirm({
+                    title: 'Reset Demo Showcase?',
+                    message: 'Are you sure you want to restore default showcase data? This will clear local caches and reset state.',
+                    confirmText: 'Reset Showcase',
+                    cancelText: 'Keep Current State',
+                    variant: 'danger'
+                  });
+                  if (agreed) {
                     resetToDemo();
                   }
                 }}

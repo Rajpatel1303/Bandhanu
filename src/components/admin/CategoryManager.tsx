@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Category } from '../../types';
 import { useStore } from '../../context/StoreContext';
+import { useNotification } from '../../context/NotificationContext';
 import { Plus, Edit2, Trash2, X, Image, Sparkles } from 'lucide-react';
 
 export const CategoryManager: React.FC = () => {
+  const { confirm: customConfirm } = useNotification();
   const { categories, addCategory, updateCategory, deleteCategory, products } = useStore();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -58,14 +60,26 @@ export const CategoryManager: React.FC = () => {
     setModalOpen(false);
   };
 
-  const handleDelete = (id: string, catName: string) => {
+  const handleDelete = async (id: string, catName: string) => {
     const attachedProducts = products.filter(p => p.category === categories.find(c => c.id === id)?.slug);
     if (attachedProducts.length > 0) {
-      if (!confirm(`Warning: There are ${attachedProducts.length} products linked to category "${catName}". Do you still want to delete it?`)) {
-        return;
-      }
+      const proceed = await customConfirm({
+        title: 'Delete Category with Products?',
+        message: `Warning: There are ${attachedProducts.length} product(s) linked to category "${catName}". Deleting this category will leave these pieces uncategorized. Do you still want to delete it?`,
+        confirmText: 'Delete Category Anyway',
+        cancelText: 'Cancel',
+        variant: 'danger'
+      });
+      if (!proceed) return;
     } else {
-      if (!confirm(`Are you sure you want to delete category "${catName}"?`)) return;
+      const proceed = await customConfirm({
+        title: 'Delete Category?',
+        message: `Are you sure you want to delete category "${catName}"?`,
+        confirmText: 'Delete Category',
+        cancelText: 'Cancel',
+        variant: 'danger'
+      });
+      if (!proceed) return;
     }
     deleteCategory(id);
   };

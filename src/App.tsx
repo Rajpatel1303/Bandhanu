@@ -1,5 +1,7 @@
 import React from 'react';
 import { StoreProvider, useStore } from './context/StoreContext';
+import { NotificationProvider } from './context/NotificationContext';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
@@ -13,6 +15,7 @@ import { ProductDetailPage } from './pages/ProductDetailPage';
 import { ContactPage } from './pages/ContactPage';
 import { AboutPage } from './pages/AboutPage';
 import { WishlistPage } from './pages/WishlistPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 // Admin Studio Components (Secret / Private Access Only)
 import { StudioAuthGate } from './components/admin/StudioAuthGate';
@@ -78,6 +81,8 @@ const AppContent: React.FC = () => {
         return <AboutPage />;
       case 'wishlist':
         return <WishlistPage />;
+      case '404':
+        return <NotFoundPage />;
       case 'home':
       default:
         return <HomePage />;
@@ -103,9 +108,13 @@ const AppContent: React.FC = () => {
 
 export function App() {
   return (
-    <StoreProvider>
-      <AppContent />
-    </StoreProvider>
+    <ErrorBoundary>
+      <NotificationProvider>
+        <StoreProvider>
+          <AppContent />
+        </StoreProvider>
+      </NotificationProvider>
+    </ErrorBoundary>
   );
 }
 

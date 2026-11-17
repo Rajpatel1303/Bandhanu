@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Product, AvailabilityStatus } from '../../types';
 import { useStore } from '../../context/StoreContext';
+import { useNotification } from '../../context/NotificationContext';
 import { ProductModal } from './ProductModal';
 import {
   Plus,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 
 export const ProductList: React.FC = () => {
+  const { confirm: customConfirm } = useNotification();
   const {
     products,
     categories,
@@ -56,8 +58,15 @@ export const ProductList: React.FC = () => {
     setModalOpen(true);
   };
 
-  const handleDelete = (id: string, title: string) => {
-    if (confirm(`Are you sure you want to remove "${title}" from the catalogue?`)) {
+  const handleDelete = async (id: string, title: string) => {
+    const agreed = await customConfirm({
+      title: 'Remove Product from Catalogue?',
+      message: `Are you sure you want to remove "${title}"? This action cannot be undone.`,
+      confirmText: 'Delete Piece',
+      cancelText: 'Keep Piece',
+      variant: 'danger'
+    });
+    if (agreed) {
       deleteProduct(id);
     }
   };
@@ -83,12 +92,19 @@ export const ProductList: React.FC = () => {
           {products.length > 0 && (
             <button
               type="button"
-              onClick={() => {
-                if (confirm('Are you sure you want to remove all products from the database? This cannot be undone.')) {
+              onClick={async () => {
+                const agreed = await customConfirm({
+                  title: 'Empty Entire Product Catalogue?',
+                  message: 'Are you sure you want to remove all products from your active collection? This will leave your catalogue completely empty.',
+                  confirmText: 'Empty All Products',
+                  cancelText: 'Cancel',
+                  variant: 'danger'
+                });
+                if (agreed) {
                   clearAllProducts();
                 }
               }}
-              className="px-4 py-2.5 rounded-xl border border-red-300 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 font-semibold text-xs transition-all flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-xl border border-red-300 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Clear All</span>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
+import { useNotification } from '../context/NotificationContext';
 import { ProductCard } from '../components/customer/ProductCard';
 import { BandhaniMotifDivider } from '../components/common/BandhaniMotifDivider';
 import {
@@ -28,8 +29,9 @@ export const ProductDetailPage: React.FC = () => {
     setSelectedCategory,
     profile
   } = useStore();
+  const { notify } = useNotification();
 
-  const product = products.find((p) => p.id === selectedProductId) || products[0];
+  const product = selectedProductId ? products.find((p) => p.id === selectedProductId) : products[0];
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -38,14 +40,27 @@ export const ProductDetailPage: React.FC = () => {
 
   if (!product) {
     return (
-      <div className="py-24 text-center">
-        <p className="font-serif text-lg text-[#241E1C]">Product not found.</p>
-        <button
-          onClick={() => setCurrentPage('catalogue')}
-          className="mt-4 px-6 py-2.5 rounded-full bg-[#4A121A] text-white text-xs font-semibold"
-        >
-          Back to Shop
-        </button>
+      <div className="min-h-[60vh] flex items-center justify-center py-20 px-4 text-center">
+        <div className="max-w-md w-full p-8 rounded-3xl bg-heritage-sand/60 dark:bg-heritage-darkCard border border-heritage-gold/30 space-y-4 shadow-xl">
+          <div className="w-14 h-14 rounded-2xl bg-heritage-crimson/10 dark:bg-heritage-gold/10 text-heritage-crimson dark:text-heritage-gold flex items-center justify-center font-serif text-xl font-bold mx-auto border border-heritage-gold/30">
+            BD
+          </div>
+          <h2 className="font-serif text-2xl font-bold text-heritage-charcoal dark:text-white">
+            Handcrafted Piece Not Found
+          </h2>
+          <p className="text-xs sm:text-sm text-heritage-charcoal/70 dark:text-gray-300 leading-relaxed font-sans">
+            The requested textile may have found its patron or the catalog identifier has changed.
+          </p>
+          <button
+            onClick={() => {
+              setCurrentPage('catalogue');
+              window.location.hash = '#/catalogue';
+            }}
+            className="mt-2 px-6 py-2.5 rounded-full bg-heritage-crimson hover:bg-heritage-ruby text-white text-xs font-semibold shadow-md transition-all cursor-pointer"
+          >
+            Explore Active Collection
+          </button>
+        </div>
       </div>
     );
   }
@@ -65,6 +80,7 @@ export const ProductDetailPage: React.FC = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
       setCopied(true);
+      notify.royal('Piece Link Copied ✨', 'Direct shareable atelier link copied to clipboard.');
       setTimeout(() => setCopied(false), 2000);
     }
   };

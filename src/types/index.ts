@@ -95,8 +95,45 @@ export interface CartItem {
 }
 
 export type ActiveView = 'store' | 'admin';
-export type CustomerPage = 'home' | 'catalogue' | 'product' | 'contact' | 'about' | 'wishlist';
+export type CustomerPage = 'home' | 'catalogue' | 'product' | 'contact' | 'about' | 'wishlist' | '404';
 export type AdminTab = 'analytics' | 'products' | 'categories' | 'banners' | 'cms' | 'theme' | 'settings';
+
+export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'royal';
+
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
+export interface Toast {
+  id: string;
+  type: ToastType;
+  title: string;
+  message?: string;
+  duration?: number; // ms, defaults to 4000
+  action?: ToastAction;
+  thumbnail?: string;
+}
+
+export type DialogVariant = 'danger' | 'warning' | 'info' | 'royal';
+
+export interface ConfirmationDialogOptions {
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: DialogVariant;
+  onConfirm: () => void | Promise<void>;
+  onCancel?: () => void;
+}
+
+export interface AlertDialogOptions {
+  title: string;
+  message: string;
+  buttonText?: string;
+  variant?: DialogVariant;
+  onClose?: () => void;
+}
 
 export interface SiteAnnouncement {
   enabled: boolean;

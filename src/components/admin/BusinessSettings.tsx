@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
+import { useNotification } from '../../context/NotificationContext';
 import {
   MessageCircle,
   Save,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 
 export const BusinessSettings: React.FC = () => {
+  const { confirm: customConfirm, alert: customAlert } = useNotification();
   const {
     profile,
     updateProfile,
@@ -116,7 +118,11 @@ export const BusinessSettings: React.FC = () => {
           setImportStatus('Catalogue imported successfully!');
           setTimeout(() => setImportStatus(null), 3000);
         } else {
-          alert('Invalid backup JSON format.');
+          customAlert({
+            title: 'Invalid Backup Format',
+            message: 'The file you selected is not a valid Bandhanu JSON database backup. Please select a valid .json file.',
+            variant: 'danger'
+          });
         }
       };
       reader.readAsText(file);
@@ -483,8 +489,15 @@ export const BusinessSettings: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => {
-              if (confirm('Reset entire catalogue to default seed data? All custom products will be restored to initial state.')) {
+            onClick={async () => {
+              const agreed = await customConfirm({
+                title: 'Reset Catalogue to Default?',
+                message: 'Are you sure you want to restore default seed data? All custom products and edits will be restored to initial state.',
+                confirmText: 'Reset Catalogue',
+                cancelText: 'Cancel',
+                variant: 'danger'
+              });
+              if (agreed) {
                 resetToDemo();
               }
             }}

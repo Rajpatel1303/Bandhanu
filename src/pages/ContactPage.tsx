@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
+import { useNotification } from '../context/NotificationContext';
 import { getWhatsAppDirectUrl, openWhatsAppDirect } from '../utils/whatsapp';
 import {
   MapPin,
@@ -39,6 +40,7 @@ const FAQS = [
 
 export const ContactPage: React.FC = () => {
   const { profile, siteContent, setCurrentPage } = useStore();
+  const { notify } = useNotification();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -76,12 +78,14 @@ Looking forward to hearing from your master artisans!`;
       origin: { y: 0.7 }
     });
 
+    notify.royal('Consultation Inquiry Prepared ✨', 'Connecting you with the Bhadli master artisans on WhatsApp...');
     openWhatsAppDirect(profile.whatsappNumber, generatedWhatsAppMessage);
   };
 
   const handleCopyNumber = () => {
     navigator.clipboard.writeText(profile.whatsappNumber);
     setCopied(true);
+    notify.success('Number Copied', 'Direct atelier phone number copied to clipboard.');
     setTimeout(() => setCopied(false), 2500);
   };
 
