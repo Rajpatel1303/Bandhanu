@@ -235,16 +235,25 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'bandhanu_products_v7',
-  CATEGORIES: 'bandhanu_categories_v6',
+  PRODUCTS: 'bandhanu_products_v8',
+  CATEGORIES: 'bandhanu_categories_v8',
   BANNERS: 'bandhanu_banners_v6',
   PROFILE: 'bandhanu_profile_v6',
-  ENQUIRIES: 'bandhanu_enquiries_v7',
+  ENQUIRIES: 'bandhanu_enquiries_v8',
   WISHLIST: 'bandhanu_wishlist_v6',
   CART: 'bandhanu_cart_v6',
   SITE_CONTENT: 'bandhanu_site_content_v6',
   STUDIO_AUTH: 'bandhanu_studio_session'
 };
+
+// Purge legacy mock storage from user browsers
+try {
+  ['v6', 'v7'].forEach(ver => {
+    ['products', 'categories', 'enquiries'].forEach(type => {
+      localStorage.removeItem(`bandhanu_${type}_${ver}`);
+    });
+  });
+} catch {}
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Navigation & View States

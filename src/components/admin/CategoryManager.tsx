@@ -20,7 +20,7 @@ export const CategoryManager: React.FC = () => {
     setName('');
     setSlug('');
     setDescription('');
-    setImage('https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80');
+    setImage('');
     setBadge('Curated');
     setModalOpen(true);
   };
@@ -93,7 +93,22 @@ export const CategoryManager: React.FC = () => {
       </div>
 
       {/* Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {categories.length === 0 ? (
+        <div className="py-16 text-center text-gray-400 bg-white dark:bg-heritage-darkCard rounded-3xl border border-heritage-gold/25 p-8 space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-heritage-gold/10 text-heritage-crimson dark:text-heritage-gold flex items-center justify-center mx-auto">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <div>
+            <h4 className="font-serif font-bold text-base text-heritage-charcoal dark:text-white">
+              No Categories Created Yet
+            </h4>
+            <p className="text-xs text-gray-400 mt-1 max-w-sm mx-auto">
+              Create your product categories (e.g., Sarees, Dupattas, Fabrics) by clicking "Add New Category" above.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map(cat => {
           const count = products.filter(p => p.category === cat.slug).length;
           return (
@@ -151,7 +166,8 @@ export const CategoryManager: React.FC = () => {
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
 
       {/* Add / Edit Category Modal */}
       {modalOpen && (

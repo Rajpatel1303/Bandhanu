@@ -95,31 +95,27 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       setColors(productToEdit.colors || []);
       setFeatures(productToEdit.features || []);
     } else {
-      // Defaults for new product
+      // Clean blank defaults for new product
       setTitle('');
       setSubtitle('');
       setSku(`BD-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`);
-      setCategory(categories[0]?.slug || 'saree');
+      setCategory(categories[0]?.slug || '');
       setSubCategory('');
-      setPrice(16500);
-      setOriginalPrice(19500);
-      setFabric('Pure Gajji Silk');
-      setCraftTechnique('Fine Rai Bandhej');
-      setKnotCount('~18,000 hand-tied micro knots');
+      setPrice(0);
+      setOriginalPrice(undefined);
+      setFabric('');
+      setCraftTechnique('');
+      setKnotCount('');
       setAvailability('in_stock');
-      setLeadTime('Ready to Dispatch within 24 Hours');
+      setLeadTime('Ready to Dispatch');
       setIsFeatured(false);
       setIsNewDrop(true);
-      setDescription('Handcrafted in Jamnagar by master artisans with authentic natural resist dyeing.');
+      setDescription('');
       setWashCare('Strictly dry clean only.');
-      setDimensions('Length: 5.5m + 0.8m blouse piece. Width: 44 inches.');
-      setImages(['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1000&q=85']);
-      setColors([{ name: 'Sindoor Crimson', hex: '#9B111E', inStock: true }]);
-      setFeatures([
-        'Authentic hand-knotted Rai Bandhani',
-        'Pure Mulberry Silk Mark verified',
-        'Unstitched matching blouse fabric included'
-      ]);
+      setDimensions('');
+      setImages([]);
+      setColors([]);
+      setFeatures([]);
     }
   }, [productToEdit, isOpen, categories]);
 

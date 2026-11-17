@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStore } from '../../context/StoreContext';
 import {
   TrendingUp,
@@ -7,8 +7,6 @@ import {
   Layers,
   Sparkles,
   Award,
-  ArrowUpRight,
-  Eye,
   CheckCircle,
   Clock,
   DollarSign
@@ -18,11 +16,11 @@ export const DashboardOverview: React.FC = () => {
   const { products, categories, enquiryLogs, profile, setAdminTab, navigateToProduct } = useStore();
   const [hoveredDataPoint, setHoveredDataPoint] = useState<number | null>(null);
 
-  // Key Analytics Calculations
+  // Key Analytics Calculations (100% Real Dynamic Data)
   const totalCatalogueValue = products.reduce((sum, p) => sum + (p.price || 0), 0);
-  const totalEnquiries = enquiryLogs.length + products.reduce((sum, p) => sum + (p.enquiriesCount || 0), 0);
+  const totalEnquiries = enquiryLogs.length;
   const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0);
-  const conversionRate = totalViews > 0 ? ((totalEnquiries / totalViews) * 100).toFixed(1) : '0';
+  const conversionRate = totalViews > 0 ? ((totalEnquiries / totalViews) * 100).toFixed(1) : '0.0';
   const avgProductPrice = products.length > 0 ? Math.round(totalCatalogueValue / products.length) : 0;
 
   // Stock status breakdown
@@ -53,25 +51,32 @@ export const DashboardOverview: React.FC = () => {
     { label: `Above ${profile.currencySymbol}25k`, count: products.filter(p => p.price > 25000).length, tag: 'Bridal Couture' }
   ];
 
-  // 14-Day Mock/Simulated Timeline Data for SVG Chart
-  const timelineData = [
-    { day: 'Mar 08', enquiries: 4, views: 65 },
-    { day: 'Mar 09', enquiries: 7, views: 92 },
-    { day: 'Mar 10', enquiries: 5, views: 80 },
-    { day: 'Mar 11', enquiries: 9, views: 115 },
-    { day: 'Mar 12', enquiries: 8, views: 104 },
-    { day: 'Mar 13', enquiries: 12, views: 140 },
-    { day: 'Mar 14', enquiries: 14, views: 165 },
-    { day: 'Mar 15', enquiries: 11, views: 130 },
-    { day: 'Mar 16', enquiries: 16, views: 190 },
-    { day: 'Mar 17', enquiries: 19, views: 220 },
-    { day: 'Mar 18', enquiries: 15, views: 185 },
-    { day: 'Mar 19', enquiries: 22, views: 250 },
-    { day: 'Mar 20', enquiries: 26, views: 290 },
-    { day: 'Mar 21', enquiries: 24, views: 275 }
-  ];
+  // Real Dynamic Timeline Data for Last 14 Days
+  const timelineData = useMemo(() => {
+    const days: { day: string; dateKey: string; enquiries: number }[] = [];
+    const now = new Date();
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const dateKey = d.toISOString().split('T')[0];
+      const dayLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      days.push({ day: dayLabel, dateKey, enquiries: 0 });
+    }
 
-  const maxEnquiry = Math.max(...timelineData.map(d => d.enquiries));
+    enquiryLogs.forEach(log => {
+      if (!log.timestamp) return;
+      const logDate = log.timestamp.split('T')[0].split(' ')[0];
+      const found = days.find(d => d.dateKey === logDate);
+      if (found) {
+        found.enquiries += 1;
+      }
+    });
+
+    return days;
+  }, [enquiryLogs]);
+
+  const totalTimelineEnquiries = timelineData.reduce((sum, d) => sum + d.enquiries, 0);
+  const maxEnquiry = Math.max(...timelineData.map(d => d.enquiries), 1);
 
   // Top products by enquiries
   const topProducts = [...products]
@@ -136,7 +141,7 @@ export const DashboardOverview: React.FC = () => {
           </div>
           <div className="text-[10px] sm:text-[11px] text-emerald-600 font-medium flex items-center gap-1 truncate">
             <TrendingUp className="w-3 h-3 shrink-0" />
-            <span className="truncate">High momentum</span>
+            <span className="truncate">{totalEnquiries > 0 ? `${totalEnquiries} recorded` : 'No inquiries yet'}</span>
           </div>
         </div>
 
@@ -173,7 +178,7 @@ export const DashboardOverview: React.FC = () => {
         </div>
       </div>
 
-      {/* Chart 1: Interactive SVG Daily Enquiry Velocity Chart */}
+      {/* Chart 1: Real Dynamic SVG Daily Enquiry Velocity Chart */}
       <div className="p-6 rounded-3xl bg-white dark:bg-heritage-darkCard border border-heritage-gold/30 shadow-md space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
@@ -181,7 +186,7 @@ export const DashboardOverview: React.FC = () => {
               WhatsApp Order Enquiry Velocity (Last 14 Days)
             </h3>
             <p className="text-xs text-heritage-charcoal/60 dark:text-gray-400">
-              Interactive flow tracking customer inquiries generated across all Bandhani styles
+              Real-time customer inquiries generated across all Bandhani styles
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs">
@@ -192,96 +197,110 @@ export const DashboardOverview: React.FC = () => {
           </div>
         </div>
 
-        {/* SVG Area Line Chart */}
-        <div className="relative pt-4 pb-2">
-          <svg viewBox="0 0 700 220" className="w-full h-56 overflow-visible">
-            <defs>
-              <linearGradient id="enquiryGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10B981" stopOpacity="0.35" />
-                <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
-              </linearGradient>
-            </defs>
-
-            {/* Grid Lines */}
-            {[0, 50, 100, 150].map((y, idx) => (
-              <line
-                key={idx}
-                x1="40"
-                y1={y + 30}
-                x2="680"
-                y2={y + 30}
-                stroke="currentColor"
-                className="text-gray-200 dark:text-gray-800"
-                strokeDasharray="4,4"
-              />
-            ))}
-
-            {/* Compute SVG Path Points */}
-            {(() => {
-              const startX = 50;
-              const width = 620;
-              const step = width / (timelineData.length - 1);
-              const height = 150;
-              const baseY = 180;
-
-              const points = timelineData.map((d, i) => {
-                const x = startX + i * step;
-                const y = baseY - (d.enquiries / (maxEnquiry || 1)) * height;
-                return { x, y, data: d };
-              });
-
-              const dStr = points.reduce(
-                (acc, p, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`,
-                ''
-              );
-              const areaStr = `${dStr} L ${startX + (timelineData.length - 1) * step} ${baseY} L ${startX} ${baseY} Z`;
-
-              return (
-                <>
-                  <path d={areaStr} fill="url(#enquiryGradient)" />
-                  <path d={dStr} fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" />
-
-                  {points.map((p, idx) => (
-                    <g key={idx} className="cursor-pointer">
-                      <circle
-                        cx={p.x}
-                        cy={p.y}
-                        r={hoveredDataPoint === idx ? 6 : 4}
-                        fill="#10B981"
-                        stroke="#fff"
-                        strokeWidth="2"
-                        className="transition-all"
-                        onMouseEnter={() => setHoveredDataPoint(idx)}
-                        onMouseLeave={() => setHoveredDataPoint(null)}
-                      />
-                      {/* X-axis labels */}
-                      {idx % 2 === 0 && (
-                        <text
-                          x={p.x}
-                          y="205"
-                          textAnchor="middle"
-                          fontSize="10"
-                          className="fill-gray-400 font-mono"
-                        >
-                          {p.data.day}
-                        </text>
-                      )}
-                    </g>
-                  ))}
-                </>
-              );
-            })()}
-          </svg>
-
-          {/* Hover Tooltip display */}
-          {hoveredDataPoint !== null && (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-heritage-darkSurface text-white text-xs border border-emerald-500/40 shadow-xl flex items-center gap-3">
-              <span className="font-semibold text-heritage-gold">{timelineData[hoveredDataPoint].day}:</span>
-              <span className="text-emerald-400 font-bold">{timelineData[hoveredDataPoint].enquiries} WhatsApp Orders</span>
-              <span className="text-gray-400">({timelineData[hoveredDataPoint].views} views)</span>
+        {totalTimelineEnquiries === 0 ? (
+          <div className="py-14 text-center space-y-3 bg-heritage-sand/15 dark:bg-heritage-darkSurface/40 rounded-2xl border border-heritage-gold/20">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto">
+              <MessageCircle className="w-6 h-6" />
             </div>
-          )}
-        </div>
+            <div className="space-y-1">
+              <h4 className="font-serif font-bold text-sm text-heritage-charcoal dark:text-white">
+                No Inquiries Recorded Yet
+              </h4>
+              <p className="text-xs text-gray-400 max-w-md mx-auto">
+                When customers click "Enquire on WhatsApp" on any product, live customer inquiry velocity will graph here automatically.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="relative pt-4 pb-2">
+            <svg viewBox="0 0 700 220" className="w-full h-56 overflow-visible">
+              <defs>
+                <linearGradient id="enquiryGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10B981" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
+                </linearGradient>
+              </defs>
+
+              {/* Grid Lines */}
+              {[0, 50, 100, 150].map((y, idx) => (
+                <line
+                  key={idx}
+                  x1="40"
+                  y1={y + 30}
+                  x2="680"
+                  y2={y + 30}
+                  stroke="currentColor"
+                  className="text-gray-200 dark:text-gray-800"
+                  strokeDasharray="4,4"
+                />
+              ))}
+
+              {/* Compute SVG Path Points from Real Timeline Data */}
+              {(() => {
+                const startX = 50;
+                const width = 620;
+                const step = width / (timelineData.length - 1 || 1);
+                const height = 150;
+                const baseY = 180;
+
+                const points = timelineData.map((d, i) => {
+                  const x = startX + i * step;
+                  const y = baseY - (d.enquiries / (maxEnquiry || 1)) * height;
+                  return { x, y, data: d };
+                });
+
+                const dStr = points.reduce(
+                  (acc, p, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`,
+                  ''
+                );
+                const areaStr = `${dStr} L ${startX + (timelineData.length - 1) * step} ${baseY} L ${startX} ${baseY} Z`;
+
+                return (
+                  <>
+                    <path d={areaStr} fill="url(#enquiryGradient)" />
+                    <path d={dStr} fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" />
+
+                    {points.map((p, idx) => (
+                      <g key={idx} className="cursor-pointer">
+                        <circle
+                          cx={p.x}
+                          cy={p.y}
+                          r={hoveredDataPoint === idx ? 6 : 4}
+                          fill="#10B981"
+                          stroke="#fff"
+                          strokeWidth="2"
+                          className="transition-all"
+                          onMouseEnter={() => setHoveredDataPoint(idx)}
+                          onMouseLeave={() => setHoveredDataPoint(null)}
+                        />
+                        {/* X-axis labels */}
+                        {idx % 2 === 0 && (
+                          <text
+                            x={p.x}
+                            y="205"
+                            textAnchor="middle"
+                            fontSize="10"
+                            className="fill-gray-400 font-mono"
+                          >
+                            {p.data.day}
+                          </text>
+                        )}
+                      </g>
+                    ))}
+                  </>
+                );
+              })()}
+            </svg>
+
+            {/* Hover Tooltip display */}
+            {hoveredDataPoint !== null && (
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-heritage-darkSurface text-white text-xs border border-emerald-500/40 shadow-xl flex items-center gap-3">
+                <span className="font-semibold text-heritage-gold">{timelineData[hoveredDataPoint].day}:</span>
+                <span className="text-emerald-400 font-bold">{timelineData[hoveredDataPoint].enquiries} WhatsApp Orders</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Grid: Category Breakdown & Price Brackets & Inventory Health */}
@@ -293,32 +312,36 @@ export const DashboardOverview: React.FC = () => {
               Category Distribution
             </h3>
             <span className="text-xs text-heritage-charcoal/60 dark:text-gray-400 font-mono">
-              {categories.length} edits
+              {categories.length} categories
             </span>
           </div>
 
           <div className="space-y-3 pt-2">
-            {categoryStats.map((c, i) => (
-              <div key={c.slug} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-heritage-charcoal dark:text-gray-200">
-                    {c.name}
-                  </span>
-                  <span className="font-mono text-heritage-charcoal/70 dark:text-gray-400">
-                    {c.count} pcs ({c.percentage}%)
-                  </span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-heritage-sand/80 dark:bg-gray-700 overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${c.percentage}%`,
-                      backgroundColor: ['#9B111E', '#C85A32', '#D4AF37', '#1F2942', '#1A5336'][i % 5]
-                    }}
-                  />
-                </div>
+            {categories.length === 0 ? (
+              <div className="py-8 text-center text-gray-400 text-xs">
+                <Layers className="w-6 h-6 mx-auto mb-1.5 opacity-40" />
+                <span>No categories created yet</span>
               </div>
-            ))}
+            ) : (
+              categoryStats.map((c) => (
+                <div key={c.slug} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-heritage-charcoal dark:text-gray-200">
+                      {c.name}
+                    </span>
+                    <span className="font-mono text-heritage-charcoal/70 dark:text-gray-400">
+                      {c.count} pcs ({c.percentage}%)
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-heritage-sand dark:bg-gray-700 overflow-hidden">
+                    <div
+                      className="h-full bg-heritage-crimson rounded-full"
+                      style={{ width: `${c.percentage}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -326,26 +349,22 @@ export const DashboardOverview: React.FC = () => {
         <div className="p-6 rounded-3xl bg-white dark:bg-heritage-darkCard border border-heritage-gold/25 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-serif font-bold text-base text-heritage-charcoal dark:text-white">
-              Price Segment Concentration
+              Price Brackets
             </h3>
-            <span className="text-xs text-heritage-crimson dark:text-heritage-gold font-semibold">
-              Catalogue Tiers
-            </span>
+            <span className="text-xs text-heritage-gold font-mono">Spectrum</span>
           </div>
 
           <div className="space-y-3 pt-2">
-            {priceBrackets.map((tier, idx) => (
+            {priceBrackets.map((tier) => (
               <div
-                key={idx}
-                className="p-3.5 rounded-2xl bg-heritage-sand/30 dark:bg-heritage-darkSurface/60 border border-heritage-gold/20 flex items-center justify-between"
+                key={tier.label}
+                className="p-3 rounded-2xl bg-heritage-sand/25 dark:bg-heritage-darkSurface border border-heritage-gold/20 flex items-center justify-between"
               >
                 <div>
-                  <div className="text-xs font-bold text-heritage-charcoal dark:text-white">
+                  <div className="font-semibold text-xs text-heritage-charcoal dark:text-white">
                     {tier.label}
                   </div>
-                  <div className="text-[10px] text-heritage-charcoal/60 dark:text-gray-400">
-                    {tier.tag}
-                  </div>
+                  <div className="text-[10px] text-gray-500">{tier.tag}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-bold text-heritage-crimson dark:text-heritage-gold">
@@ -428,7 +447,7 @@ export const DashboardOverview: React.FC = () => {
               Most Enquired Heirloom Pieces Leaderboard
             </h3>
             <p className="text-[11px] sm:text-xs text-heritage-charcoal/60 dark:text-gray-400">
-              Pieces driving highest direct WhatsApp buyer conversations
+              Pieces driving direct WhatsApp buyer conversations
             </p>
           </div>
           <button
@@ -439,116 +458,134 @@ export const DashboardOverview: React.FC = () => {
           </button>
         </div>
 
-        {/* Mobile Leaderboard Cards (md:hidden) */}
-        <div className="md:hidden space-y-2.5">
-          {topProducts.map((p, idx) => (
-            <div
-              key={p.id}
-              className="p-3 rounded-2xl bg-heritage-sand/20 dark:bg-heritage-darkSurface/60 border border-heritage-gold/20 flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-5 h-5 rounded-full bg-heritage-crimson/10 text-heritage-crimson font-serif font-bold text-xs flex items-center justify-center shrink-0">
-                  {idx + 1}
-                </span>
-                <img
-                  src={p.images[0]}
-                  alt=""
-                  className="w-11 h-14 rounded-lg object-cover border border-heritage-gold/20 shrink-0"
-                />
-                <div className="min-w-0">
-                  <div className="font-semibold text-xs text-heritage-charcoal dark:text-white truncate">
-                    {p.title}
-                  </div>
-                  <div className="text-[10px] text-heritage-crimson dark:text-heritage-gold font-medium truncate">
-                    {p.craftTechnique}
-                  </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="font-serif font-bold text-xs text-heritage-charcoal dark:text-gray-200">
-                      {profile.currencySymbol}{p.price.toLocaleString('en-IN')}
-                    </span>
-                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[9px]">
-                      <MessageCircle className="w-2.5 h-2.5 fill-current" />
-                      {p.enquiriesCount || 0}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => navigateToProduct(p.id)}
-                className="px-2.5 py-1 rounded-lg border border-heritage-gold/30 hover:bg-heritage-sand/50 text-[10px] font-semibold shrink-0"
-              >
-                Inspect
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop Leaderboard Table (hidden md:block) */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b border-heritage-gold/20 text-heritage-charcoal/60 dark:text-gray-400 uppercase tracking-wider text-[10px]">
-              <tr>
-                <th className="py-3 px-3">Product</th>
-                <th className="py-3 px-3">SKU</th>
-                <th className="py-3 px-3">Price</th>
-                <th className="py-3 px-3">WhatsApp Clicks</th>
-                <th className="py-3 px-3">Stock Status</th>
-                <th className="py-3 px-3 text-right">Quick Inspect</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-heritage-gold/15">
+        {topProducts.length === 0 ? (
+          <div className="py-12 text-center text-gray-400 space-y-2 bg-heritage-sand/15 dark:bg-heritage-darkSurface/30 rounded-2xl border border-heritage-gold/20">
+            <Package className="w-8 h-8 mx-auto opacity-40 text-gray-400" />
+            <p className="font-semibold text-xs text-heritage-charcoal dark:text-gray-300">No products added yet</p>
+            <p className="text-[11px] text-gray-400">Products will appear here with enquiry analytics as you add them to your catalogue.</p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile Leaderboard Cards (md:hidden) */}
+            <div className="md:hidden space-y-2.5">
               {topProducts.map((p, idx) => (
-                <tr key={p.id} className="hover:bg-heritage-sand/30 dark:hover:bg-heritage-darkSurface/50 transition-colors">
-                  <td className="py-3 px-3 flex items-center gap-3">
-                    <img
-                      src={p.images[0]}
-                      alt=""
-                      className="w-10 h-12 rounded-lg object-cover border border-heritage-gold/20 shrink-0"
-                    />
-                    <div>
-                      <div className="font-semibold text-heritage-charcoal dark:text-white line-clamp-1">
+                <div
+                  key={p.id}
+                  className="p-3 rounded-2xl bg-heritage-sand/20 dark:bg-heritage-darkSurface/60 border border-heritage-gold/20 flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="w-5 h-5 rounded-full bg-heritage-crimson/10 text-heritage-crimson font-serif font-bold text-xs flex items-center justify-center shrink-0">
+                      {idx + 1}
+                    </span>
+                    {p.images[0] && (
+                      <img
+                        src={p.images[0]}
+                        alt=""
+                        className="w-11 h-14 rounded-lg object-cover border border-heritage-gold/20 shrink-0"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <div className="font-semibold text-xs text-heritage-charcoal dark:text-white truncate">
                         {p.title}
                       </div>
-                      <div className="text-[10px] text-heritage-crimson dark:text-heritage-gold font-medium">
+                      <div className="text-[10px] text-heritage-crimson dark:text-heritage-gold font-medium truncate">
                         {p.craftTechnique}
                       </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="font-serif font-bold text-xs text-heritage-charcoal dark:text-gray-200">
+                          {profile.currencySymbol}{p.price.toLocaleString('en-IN')}
+                        </span>
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[9px]">
+                          <MessageCircle className="w-2.5 h-2.5 fill-current" />
+                          {p.enquiriesCount || 0}
+                        </span>
+                      </div>
                     </div>
-                  </td>
-                  <td className="py-3 px-3 font-mono text-gray-500">{p.sku}</td>
-                  <td className="py-3 px-3 font-bold text-heritage-crimson dark:text-heritage-gold">
-                    {profile.currencySymbol}{p.price.toLocaleString('en-IN')}
-                  </td>
-                  <td className="py-3 px-3">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold">
-                      <MessageCircle className="w-3 h-3 fill-current" />
-                      {p.enquiriesCount || 0} enquiries
-                    </span>
-                  </td>
-                  <td className="py-3 px-3">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        p.availability === 'in_stock'
-                          ? 'bg-emerald-500/15 text-emerald-700'
-                          : 'bg-amber-500/15 text-amber-700'
-                      }`}
-                    >
-                      {p.availability === 'in_stock' ? 'Ready to Ship' : 'Made to Order'}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right">
-                    <button
-                      onClick={() => navigateToProduct(p.id)}
-                      className="px-2.5 py-1 rounded-lg border border-heritage-gold/30 hover:bg-heritage-sand/50 text-[11px] font-medium"
-                    >
-                      View Live
-                    </button>
-                  </td>
-                </tr>
+                  </div>
+
+                  <button
+                    onClick={() => navigateToProduct(p.id)}
+                    className="px-2.5 py-1 rounded-lg border border-heritage-gold/30 hover:bg-heritage-sand/50 text-[10px] font-semibold shrink-0"
+                  >
+                    Inspect
+                  </button>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+
+            {/* Desktop Leaderboard Table (hidden md:block) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="border-b border-heritage-gold/20 text-heritage-charcoal/60 dark:text-gray-400 uppercase tracking-wider text-[10px]">
+                  <tr>
+                    <th className="py-3 px-3">Product</th>
+                    <th className="py-3 px-3">SKU</th>
+                    <th className="py-3 px-3">Price</th>
+                    <th className="py-3 px-3">WhatsApp Clicks</th>
+                    <th className="py-3 px-3">Stock Status</th>
+                    <th className="py-3 px-3 text-right">Quick Inspect</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-heritage-gold/15">
+                  {topProducts.map((p) => (
+                    <tr key={p.id} className="hover:bg-heritage-sand/30 dark:hover:bg-heritage-darkSurface/50 transition-colors">
+                      <td className="py-3 px-3 flex items-center gap-3">
+                        {p.images[0] ? (
+                          <img
+                            src={p.images[0]}
+                            alt=""
+                            className="w-10 h-12 rounded-lg object-cover border border-heritage-gold/20 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[9px] text-gray-400 shrink-0">
+                            No photo
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-semibold text-heritage-charcoal dark:text-white line-clamp-1">
+                            {p.title}
+                          </div>
+                          <div className="text-[10px] text-heritage-crimson dark:text-heritage-gold font-medium">
+                            {p.craftTechnique}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-3 font-mono text-gray-500">{p.sku}</td>
+                      <td className="py-3 px-3 font-bold text-heritage-crimson dark:text-heritage-gold">
+                        {profile.currencySymbol}{p.price.toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-3 px-3">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold">
+                          <MessageCircle className="w-3 h-3 fill-current" />
+                          {p.enquiriesCount || 0} enquiries
+                        </span>
+                      </td>
+                      <td className="py-3 px-3">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                            p.availability === 'in_stock'
+                              ? 'bg-emerald-500/15 text-emerald-700'
+                              : 'bg-amber-500/15 text-amber-700'
+                          }`}
+                        >
+                          {p.availability === 'in_stock' ? 'Ready to Ship' : 'Made to Order'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        <button
+                          onClick={() => navigateToProduct(p.id)}
+                          className="px-2.5 py-1 rounded-lg border border-heritage-gold/30 hover:bg-heritage-sand/50 text-[11px] font-medium"
+                        >
+                          View Live
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
