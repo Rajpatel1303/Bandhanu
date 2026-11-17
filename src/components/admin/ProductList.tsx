@@ -17,6 +17,7 @@ export const ProductList: React.FC = () => {
     products,
     categories,
     deleteProduct,
+    clearAllProducts,
     toggleFeatured,
     toggleAvailability,
     profile,
@@ -78,13 +79,30 @@ export const ProductList: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-heritage-crimson via-heritage-ruby to-heritage-terracotta text-white font-semibold text-xs shadow-md hover:shadow-lg transition-all flex items-center gap-2 self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Product</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {products.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm('Are you sure you want to remove all products from the database? This cannot be undone.')) {
+                  clearAllProducts();
+                }
+              }}
+              className="px-4 py-2.5 rounded-xl border border-red-300 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 font-semibold text-xs transition-all flex items-center gap-1.5"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear All</span>
+            </button>
+          )}
+
+          <button
+            onClick={handleOpenAdd}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-heritage-crimson via-heritage-ruby to-heritage-terracotta text-white font-semibold text-xs shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Product</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}

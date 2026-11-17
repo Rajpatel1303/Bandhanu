@@ -227,6 +227,7 @@ interface StoreContextType {
 
   // Management Utilities
   resetToDemo: () => void;
+  clearAllProducts: () => void;
   exportDatabase: () => string;
   importDatabase: (jsonString: string) => boolean;
 }
@@ -234,11 +235,11 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'bandhanu_products_v6',
+  PRODUCTS: 'bandhanu_products_v7',
   CATEGORIES: 'bandhanu_categories_v6',
   BANNERS: 'bandhanu_banners_v6',
   PROFILE: 'bandhanu_profile_v6',
-  ENQUIRIES: 'bandhanu_enquiries_v6',
+  ENQUIRIES: 'bandhanu_enquiries_v7',
   WISHLIST: 'bandhanu_wishlist_v6',
   CART: 'bandhanu_cart_v6',
   SITE_CONTENT: 'bandhanu_site_content_v6',
@@ -1081,6 +1082,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.clear();
   };
 
+  const clearAllProducts = () => {
+    setProducts([]);
+    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify([]));
+  };
+
   const exportDatabase = () => {
     const data = { products, categories, banners, profile, enquiryLogs, siteContent };
     return JSON.stringify(data, null, 2);
@@ -1164,6 +1170,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         generateWhatsAppUrl,
         triggerWhatsAppEnquiry,
         resetToDemo,
+        clearAllProducts,
         exportDatabase,
         importDatabase
       }}
