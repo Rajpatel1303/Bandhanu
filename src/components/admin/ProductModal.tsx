@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Product, ProductColor, AvailabilityStatus } from '../../types';
 import { useStore } from '../../context/StoreContext';
 import { MediaUploader } from './MediaUploader';
+import { optimizeImage } from '../../utils/imageOptimizer';
 import {
   X,
   Plus,
@@ -130,16 +131,26 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setImages(prev => [...prev, reader.result as string]);
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        const optimized = await optimizeImage(file, {
+          maxWidth: 1200,
+          maxHeight: 1400,
+          quality: 0.8,
+          format: 'image/webp'
+        });
+        setImages(prev => [...prev, optimized.dataUrl]);
+      } catch {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === 'string') {
+            setImages(prev => [...prev, reader.result as string]);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 

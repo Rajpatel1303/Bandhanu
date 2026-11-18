@@ -484,33 +484,49 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   });
 
-  // Sync to LocalStorage Cache
+  // Sync to LocalStorage Cache (with safe quota handling)
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+    try {
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+    } catch (e) {
+      console.warn('LocalStorage quota notice:', e);
+    }
   }, [products]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    try {
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    } catch {}
   }, [categories]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.BANNERS, JSON.stringify(banners));
+    try {
+      localStorage.setItem(STORAGE_KEYS.BANNERS, JSON.stringify(banners));
+    } catch {}
   }, [banners]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
+    try {
+      localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
+    } catch {}
   }, [profile]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(siteContent));
+    try {
+      localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(siteContent));
+    } catch {}
   }, [siteContent]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.ENQUIRIES, JSON.stringify(enquiryLogs));
+    try {
+      localStorage.setItem(STORAGE_KEYS.ENQUIRIES, JSON.stringify(enquiryLogs));
+    } catch {}
   }, [enquiryLogs]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.WISHLIST, JSON.stringify(wishlist));
+    try {
+      localStorage.setItem(STORAGE_KEYS.WISHLIST, JSON.stringify(wishlist));
+    } catch {}
   }, [wishlist]);
 
   // Dynamic Theme Management
@@ -591,45 +607,80 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [theme]);
 
-  // Load live data from Supabase Cloud Database (when valid credentials configured)
+  // Load live data from Cloudflare D1 Cloud Database (and Supabase fallback)
   useEffect(() => {
-    if (!isSupabaseConfigured) {
-      setDbStatus('local');
-      return;
-    }
-
-    const fetchFromSupabase = async () => {
+    const fetchLiveCloudData = async () => {
+      // 1. Try Cloudflare D1 backend API first
       try {
-        // 1. Fetch Categories & Subcategories
-        const { data: dbCategories, error: catErr } = await supabase
-          .from('categories')
-          .select('*, sub_categories(*)');
+        const [prodRes, catRes, profRes, contentRes, enqRes] = await Promise.allSettled([
+          fetch('/api/products'),
+          fetch('/api/categories'),
+          fetch('/api/profile'),
+          fetch('/api/site-content'),
+          fetch('/api/enquiries')
+        ]);
 
-        if (!catErr && dbCategories) {
-          setDbStatus('connected');
-          if (dbCategories.length > 0) {
-            const mappedCats: Category[] = dbCategories.map((c: any) => ({
-              id: c.id,
-              name: c.name,
-              slug: c.slug,
-              description: c.description || '',
-              image: c.image || '',
-              badge: c.badge || undefined,
-              isActive: c.is_active ?? true,
-              subCategories: (c.sub_categories || []).map((s: any) => ({
-                id: s.id,
-                name: s.name,
-                slug: s.slug,
-                description: s.description
-              }))
-            }));
-            setCategories(mappedCats);
+        let connectedToD1 = false;
+
+        // Process Products
+        if (prodRes.status === 'fulfilled' && prodRes.value.ok) {
+          const json = await prodRes.value.json();
+          if (json.success && Array.isArray(json.data)) {
+            setProducts(json.data);
+            connectedToD1 = true;
           }
-        } else {
-          setDbStatus('local');
         }
 
-        // 2. Fetch Products
+        // Process Categories
+        if (catRes.status === 'fulfilled' && catRes.value.ok) {
+          const json = await catRes.value.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            setCategories(json.data);
+            connectedToD1 = true;
+          }
+        }
+
+        // Process Profile
+        if (profRes.status === 'fulfilled' && profRes.value.ok) {
+          const json = await profRes.value.json();
+          if (json.success && json.data && json.data.whatsappNumber) {
+            setProfile(prev => ({ ...prev, ...json.data }));
+            connectedToD1 = true;
+          }
+        }
+
+        // Process Site Content
+        if (contentRes.status === 'fulfilled' && contentRes.value.ok) {
+          const json = await contentRes.value.json();
+          if (json.success && json.data && Object.keys(json.data).length > 0) {
+            setSiteContent(prev => ({ ...prev, ...json.data }));
+            connectedToD1 = true;
+          }
+        }
+
+        // Process Enquiries
+        if (enqRes.status === 'fulfilled' && enqRes.value.ok) {
+          const json = await enqRes.value.json();
+          if (json.success && Array.isArray(json.data)) {
+            setEnquiryLogs(json.data);
+          }
+        }
+
+        if (connectedToD1) {
+          setDbStatus('connected');
+          return;
+        }
+      } catch (e) {
+        console.log('D1 local notice:', e);
+      }
+
+      // 2. Supabase fallback if configured
+      if (!isSupabaseConfigured) {
+        setDbStatus('local');
+        return;
+      }
+
+      try {
         const { data: dbProducts, error: prodErr } = await supabase
           .from('products')
           .select('*')
@@ -663,46 +714,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             createdAt: p.created_at || new Date().toISOString()
           }));
           setProducts(mappedProds);
-        }
-
-        // 3. Fetch Universal Site Content
-        const { data: dbContent, error: contentErr } = await supabase
-          .from('site_content')
-          .select('*');
-
-        if (!contentErr && dbContent && dbContent.length > 0) {
-          setSiteContent((prev) => {
-            const merged = { ...prev };
-            dbContent.forEach((row: any) => {
-              if (row.key in merged) {
-                (merged as any)[row.key] = row.value;
-              }
-            });
-            return merged;
-          });
-
-          // Sync profile details if contact row present
-          const contactRow = dbContent.find((r: any) => r.key === 'contact');
-          if (contactRow && contactRow.value) {
-            const c = contactRow.value;
-            setProfile((prev) => ({
-              ...prev,
-              businessName: c.businessName || prev.businessName,
-              tagline: c.tagline || prev.tagline,
-              address: c.address || prev.address,
-              whatsappNumber: c.whatsappNumber || prev.whatsappNumber,
-              displayPhone: c.displayPhone || prev.displayPhone,
-              email: c.email || prev.email,
-              instagramHandle: c.instagramHandle || prev.instagramHandle
-            }));
-          }
+          setDbStatus('connected');
         }
       } catch (err) {
         console.warn('Supabase live fetch notice:', err);
       }
     };
 
-    fetchFromSupabase();
+    fetchLiveCloudData();
   }, []);
 
   // URL Hash Routing Synchronization (Dedicated routes & Secret studio route)
@@ -833,9 +852,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const isWishlisted = (productId: string) => wishlist.includes(productId);
 
-  // Content CMS Update with Supabase Cloud Sync
+  // Content CMS Update with Supabase & Cloudflare D1 Cloud Sync
   const updateSiteContent = async (newContent: UniversalSiteContent) => {
     setSiteContent(newContent);
+    try {
+      localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(newContent));
+    } catch {}
     notify.success('CMS Content Saved', 'Storefront sections and copy updated.');
 
     // Sync profile
@@ -852,6 +874,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }));
     }
 
+    // Cloudflare D1 backend sync
+    try {
+      const res = await fetch('/api/site-content', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newContent)
+      });
+      if (res.ok) setDbStatus('connected');
+    } catch (e) {
+      console.warn('D1 content sync notice:', e);
+    }
+
     if (isSupabaseConfigured) {
       try {
         for (const [key, val] of Object.entries(newContent)) {
@@ -865,7 +899,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Product Actions with Supabase Persistence
+  // Product Actions with Cloudflare D1 & Supabase Persistence
   const addProduct = async (data: Omit<Product, 'id' | 'createdAt' | 'views' | 'enquiriesCount'>): Promise<Product> => {
     const newProduct: Product = {
       ...data,
@@ -876,34 +910,48 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     setProducts(prev => [newProduct, ...prev]);
 
+    // Save to Cloudflare D1
     try {
-      await supabase.from('products').insert({
-        id: newProduct.id,
-        title: newProduct.title,
-        subtitle: newProduct.subtitle,
-        sku: newProduct.sku,
-        category: newProduct.category,
-        sub_category: newProduct.subCategory || null,
-        price: newProduct.price,
-        original_price: newProduct.originalPrice || null,
-        fabric: newProduct.fabric,
-        craft_technique: newProduct.craftTechnique,
-        knot_count: newProduct.knotCount || null,
-        availability: newProduct.availability,
-        lead_time: newProduct.leadTime || null,
-        is_featured: newProduct.isFeatured,
-        is_new_drop: newProduct.isNewDrop || false,
-        images: newProduct.images,
-        colors: newProduct.colors,
-        description: newProduct.description,
-        features: newProduct.features,
-        wash_care: newProduct.washCare,
-        dimensions: newProduct.dimensions || null,
-        views: 1,
-        enquiries_count: 0
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProduct)
       });
-    } catch (err) {
-      console.error('Supabase product insert error:', err);
+      if (res.ok) setDbStatus('connected');
+    } catch (e) {
+      console.warn('D1 product save notice:', e);
+    }
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('products').insert({
+          id: newProduct.id,
+          title: newProduct.title,
+          subtitle: newProduct.subtitle,
+          sku: newProduct.sku,
+          category: newProduct.category,
+          sub_category: newProduct.subCategory || null,
+          price: newProduct.price,
+          original_price: newProduct.originalPrice || null,
+          fabric: newProduct.fabric,
+          craft_technique: newProduct.craftTechnique,
+          knot_count: newProduct.knotCount || null,
+          availability: newProduct.availability,
+          lead_time: newProduct.leadTime || null,
+          is_featured: newProduct.isFeatured,
+          is_new_drop: newProduct.isNewDrop || false,
+          images: newProduct.images,
+          colors: newProduct.colors,
+          description: newProduct.description,
+          features: newProduct.features,
+          wash_care: newProduct.washCare,
+          dimensions: newProduct.dimensions || null,
+          views: 1,
+          enquiries_count: 0
+        });
+      } catch (err) {
+        console.error('Supabase product insert error:', err);
+      }
     }
 
     notify.success('Piece Added', `"${newProduct.title}" has been added to your catalogue.`);
@@ -913,34 +961,48 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateProduct = async (id: string, updates: Partial<Product>) => {
     setProducts(prev => prev.map(p => (p.id === id ? { ...p, ...updates } : p)));
 
+    // Save to Cloudflare D1
     try {
-      const dbUpdates: any = {};
-      if (updates.title !== undefined) dbUpdates.title = updates.title;
-      if (updates.subtitle !== undefined) dbUpdates.subtitle = updates.subtitle;
-      if (updates.sku !== undefined) dbUpdates.sku = updates.sku;
-      if (updates.category !== undefined) dbUpdates.category = updates.category;
-      if (updates.subCategory !== undefined) dbUpdates.sub_category = updates.subCategory || null;
-      if (updates.price !== undefined) dbUpdates.price = updates.price;
-      if (updates.originalPrice !== undefined) dbUpdates.original_price = updates.originalPrice;
-      if (updates.fabric !== undefined) dbUpdates.fabric = updates.fabric;
-      if (updates.craftTechnique !== undefined) dbUpdates.craft_technique = updates.craftTechnique;
-      if (updates.knotCount !== undefined) dbUpdates.knot_count = updates.knotCount;
-      if (updates.availability !== undefined) dbUpdates.availability = updates.availability;
-      if (updates.leadTime !== undefined) dbUpdates.lead_time = updates.leadTime;
-      if (updates.isFeatured !== undefined) dbUpdates.is_featured = updates.isFeatured;
-      if (updates.isNewDrop !== undefined) dbUpdates.is_new_drop = updates.isNewDrop;
-      if (updates.images !== undefined) dbUpdates.images = updates.images;
-      if (updates.colors !== undefined) dbUpdates.colors = updates.colors;
-      if (updates.description !== undefined) dbUpdates.description = updates.description;
-      if (updates.features !== undefined) dbUpdates.features = updates.features;
-      if (updates.washCare !== undefined) dbUpdates.wash_care = updates.washCare;
-      if (updates.dimensions !== undefined) dbUpdates.dimensions = updates.dimensions;
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      if (res.ok) setDbStatus('connected');
+    } catch (e) {
+      console.warn('D1 product update notice:', e);
+    }
 
-      if (Object.keys(dbUpdates).length > 0) {
-        await supabase.from('products').update(dbUpdates).eq('id', id);
+    if (isSupabaseConfigured) {
+      try {
+        const dbUpdates: any = {};
+        if (updates.title !== undefined) dbUpdates.title = updates.title;
+        if (updates.subtitle !== undefined) dbUpdates.subtitle = updates.subtitle;
+        if (updates.sku !== undefined) dbUpdates.sku = updates.sku;
+        if (updates.category !== undefined) dbUpdates.category = updates.category;
+        if (updates.subCategory !== undefined) dbUpdates.sub_category = updates.subCategory || null;
+        if (updates.price !== undefined) dbUpdates.price = updates.price;
+        if (updates.originalPrice !== undefined) dbUpdates.original_price = updates.originalPrice;
+        if (updates.fabric !== undefined) dbUpdates.fabric = updates.fabric;
+        if (updates.craftTechnique !== undefined) dbUpdates.craft_technique = updates.craftTechnique;
+        if (updates.knotCount !== undefined) dbUpdates.knot_count = updates.knotCount;
+        if (updates.availability !== undefined) dbUpdates.availability = updates.availability;
+        if (updates.leadTime !== undefined) dbUpdates.lead_time = updates.leadTime;
+        if (updates.isFeatured !== undefined) dbUpdates.is_featured = updates.isFeatured;
+        if (updates.isNewDrop !== undefined) dbUpdates.is_new_drop = updates.isNewDrop;
+        if (updates.images !== undefined) dbUpdates.images = updates.images;
+        if (updates.colors !== undefined) dbUpdates.colors = updates.colors;
+        if (updates.description !== undefined) dbUpdates.description = updates.description;
+        if (updates.features !== undefined) dbUpdates.features = updates.features;
+        if (updates.washCare !== undefined) dbUpdates.wash_care = updates.washCare;
+        if (updates.dimensions !== undefined) dbUpdates.dimensions = updates.dimensions;
+
+        if (Object.keys(dbUpdates).length > 0) {
+          await supabase.from('products').update(dbUpdates).eq('id', id);
+        }
+      } catch (err) {
+        console.error('Supabase product update error:', err);
       }
-    } catch (err) {
-      console.error('Supabase product update error:', err);
     }
     notify.success('Piece Updated', 'All specifications and changes have been saved.');
   };
@@ -950,10 +1012,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (selectedProductId === id) setSelectedProductId(null);
     if (quickViewProductId === id) setQuickViewProductId(null);
 
+    // Delete in Cloudflare D1
     try {
-      await supabase.from('products').delete().eq('id', id);
-    } catch (err) {
-      console.error('Supabase product delete error:', err);
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) setDbStatus('connected');
+    } catch (e) {
+      console.warn('D1 product delete notice:', e);
+    }
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('products').delete().eq('id', id);
+      } catch (err) {
+        console.error('Supabase product delete error:', err);
+      }
     }
     notify.info('Piece Removed', 'The item was deleted from your catalogue.');
   };
@@ -969,7 +1043,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     await updateProduct(id, { availability: status });
   };
 
-  // Category Actions with Supabase Persistence
+  // Category Actions with Cloudflare D1 & Supabase Persistence
   const addCategory = async (data: Omit<Category, 'id'>): Promise<Category> => {
     const newCategory: Category = {
       ...data,
@@ -977,50 +1051,102 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     setCategories(prev => [...prev, newCategory]);
 
+    // Save to Cloudflare D1
     try {
-      await supabase.from('categories').insert({
-        id: newCategory.id,
-        name: newCategory.name,
-        slug: newCategory.slug,
-        description: newCategory.description,
-        image: newCategory.image,
-        badge: newCategory.badge || null,
-        is_active: newCategory.isActive
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCategory)
       });
-    } catch (err) {
-      console.error('Supabase category insert error:', err);
+      if (res.ok) setDbStatus('connected');
+    } catch (e) {
+      console.warn('D1 category save notice:', e);
+    }
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('categories').insert({
+          id: newCategory.id,
+          name: newCategory.name,
+          slug: newCategory.slug,
+          description: newCategory.description,
+          image: newCategory.image,
+          badge: newCategory.badge || null,
+          is_active: newCategory.isActive
+        });
+      } catch (err) {
+        console.error('Supabase category insert error:', err);
+      }
     }
     notify.success('Category Created', `Category "${newCategory.name}" is now live.`);
     return newCategory;
   };
 
   const updateCategory = async (id: string, updates: Partial<Category>) => {
-    setCategories(prev => prev.map(c => (c.id === id ? { ...c, ...updates } : c)));
+    let targetCategory: Category | undefined;
+    setCategories(prev => {
+      const next = prev.map(c => {
+        if (c.id === id) {
+          const updated = { ...c, ...updates };
+          targetCategory = updated;
+          return updated;
+        }
+        return c;
+      });
+      return next;
+    });
 
-    try {
-      const dbUpdates: any = {};
-      if (updates.name !== undefined) dbUpdates.name = updates.name;
-      if (updates.slug !== undefined) dbUpdates.slug = updates.slug;
-      if (updates.description !== undefined) dbUpdates.description = updates.description;
-      if (updates.image !== undefined) dbUpdates.image = updates.image;
-      if (updates.badge !== undefined) dbUpdates.badge = updates.badge;
-      if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive;
-
-      if (Object.keys(dbUpdates).length > 0) {
-        await supabase.from('categories').update(dbUpdates).eq('id', id);
+    if (targetCategory) {
+      // Save to Cloudflare D1
+      try {
+        await fetch('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(targetCategory)
+        });
+      } catch (e) {
+        console.warn('D1 category update notice:', e);
       }
-    } catch (err) {
-      console.error('Supabase category update error:', err);
+    }
+
+    if (isSupabaseConfigured) {
+      try {
+        const dbUpdates: any = {};
+        if (updates.name !== undefined) dbUpdates.name = updates.name;
+        if (updates.slug !== undefined) dbUpdates.slug = updates.slug;
+        if (updates.description !== undefined) dbUpdates.description = updates.description;
+        if (updates.image !== undefined) dbUpdates.image = updates.image;
+        if (updates.badge !== undefined) dbUpdates.badge = updates.badge;
+        if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive;
+
+        if (Object.keys(dbUpdates).length > 0) {
+          await supabase.from('categories').update(dbUpdates).eq('id', id);
+        }
+      } catch (err) {
+        console.error('Supabase category update error:', err);
+      }
     }
     notify.success('Category Updated', 'Category details and subcategories saved.');
   };
 
   const deleteCategory = async (id: string) => {
     setCategories(prev => prev.filter(c => c.id !== id));
+
+    // Delete in Cloudflare D1
     try {
-      await supabase.from('categories').delete().eq('id', id);
-    } catch (err) {
-      console.error('Supabase category delete error:', err);
+      await fetch(`/api/categories/${id}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {
+      console.warn('D1 category delete notice:', e);
+    }
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('categories').delete().eq('id', id);
+      } catch (err) {
+        console.error('Supabase category delete error:', err);
+      }
     }
     notify.info('Category Removed', 'The category was deleted.');
   };
@@ -1066,11 +1192,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   };
 
-  // Profile Actions
+  // Profile Actions with Cloudflare D1 & Supabase Sync
   const updateProfile = (updates: Partial<BusinessProfile>) => {
+    let updatedProfile: BusinessProfile | null = null;
     setProfile(prev => {
       const updated = { ...prev, ...updates };
-      localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(updated));
+      updatedProfile = updated;
+      try {
+        localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(updated));
+      } catch {}
+
+      // Cloudflare D1 sync
+      fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      }).then(() => setDbStatus('connected')).catch(e => console.warn('D1 profile sync notice:', e));
 
       if (isSupabaseConfigured) {
         supabase
@@ -1103,9 +1240,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           instagramHandle: updates.instagramHandle ?? prev.contact.instagramHandle
         }
       };
-      localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(updatedContent));
+      try {
+        localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(updatedContent));
+      } catch {}
 
       // Attempt cloud sync if connected
+      fetch('/api/site-content', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedContent)
+      }).catch(e => console.warn('D1 content sync notice:', e));
+
       if (isSupabaseConfigured) {
         (async () => {
           try {
@@ -1162,21 +1307,32 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setEnquiryLogs(prev => [newLog, ...prev]);
 
-    // Update product enquiry count locally and in Supabase
+    // Update product enquiry count locally
     updateProduct(product.id, { enquiriesCount: (product.enquiriesCount || 0) + 1 });
 
+    // Cloudflare D1 Enquiry Log
     try {
-      supabase.from('enquiries').insert({
-        id: newLog.id,
-        product_id: product.id,
-        product_title: product.title,
-        customer_phone: 'Direct WhatsApp',
-        category: product.category,
-        notes: `Inquiry for ${newLog.color} shade`,
-        created_at: newLog.timestamp
-      });
-    } catch (err) {
-      console.warn('Enquiry log sync notice:', err);
+      fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newLog)
+      }).catch(e => console.warn('D1 enquiry sync notice:', e));
+    } catch {}
+
+    if (isSupabaseConfigured) {
+      try {
+        supabase.from('enquiries').insert({
+          id: newLog.id,
+          product_id: product.id,
+          product_title: product.title,
+          customer_phone: 'Direct WhatsApp',
+          category: product.category,
+          notes: `Inquiry for ${newLog.color} shade`,
+          created_at: newLog.timestamp
+        });
+      } catch (err) {
+        console.warn('Enquiry log sync notice:', err);
+      }
     }
 
     const currentUrl = typeof window !== 'undefined' ? window.location.href : 'https://bandhanu.com';
