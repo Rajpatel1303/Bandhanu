@@ -31,7 +31,7 @@ export const ProductDetailPage: React.FC = () => {
   } = useStore();
   const { notify } = useNotification();
 
-  const product = selectedProductId ? products.find((p) => p.id === selectedProductId) : products[0];
+  const product = (selectedProductId ? products.find((p) => p.id === selectedProductId) : null) || products[0];
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);

@@ -733,10 +733,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedProductId(null);
         return;
       }
-      if (raw.startsWith('product/')) {
-        const id = raw.replace('product/', '');
+      if (raw === 'product' || raw.startsWith('product/') || raw.startsWith('product?')) {
+        const id = raw.startsWith('product/')
+          ? raw.replace('product/', '').split('?')[0].trim()
+          : null;
         setCurrentPage('product');
-        setSelectedProductId(id);
+        if (id) {
+          setSelectedProductId(id);
+        }
         return;
       }
       if (raw.startsWith('catalogue')) {
@@ -788,13 +792,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSetCurrentPage = (page: CustomerPage) => {
+  const handleSetCurrentPage = (page: CustomerPage, targetProductId?: string) => {
     setCurrentPage(page);
     setActiveView('store');
     if (page !== 'product') {
       setSelectedProductId(null);
     }
-    window.location.hash = page === 'home' ? '#/' : `#/${page}`;
+    if (page === 'product') {
+      const pid = targetProductId || selectedProductId;
+      window.location.hash = pid ? `#/product/${pid}` : '#/product';
+    } else {
+      window.location.hash = page === 'home' ? '#/' : `#/${page}`;
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

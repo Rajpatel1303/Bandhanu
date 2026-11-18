@@ -12,8 +12,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const {
     isWishlisted,
     toggleWishlist,
-    setSelectedProductId,
-    setCurrentPage,
+    navigateToProduct,
     addToCart
   } = useStore();
 
@@ -21,9 +20,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const primaryImage = product.images[0] || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c';
 
   const handleCardClick = () => {
-    setSelectedProductId(product.id);
-    setCurrentPage('product');
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    navigateToProduct(product.id);
   };
 
   const handleWishlistClick = (e: React.MouseEvent) => {

@@ -8,7 +8,7 @@ export const QuickViewModal: React.FC = () => {
     products,
     quickViewProductId,
     setQuickViewProductId,
-    setSelectedProductId,
+    navigateToProduct,
     profile,
     isWishlisted,
     toggleWishlist,
@@ -38,9 +38,8 @@ export const QuickViewModal: React.FC = () => {
   };
 
   const handleOpenFullDetail = () => {
-    setSelectedProductId(product.id);
     setQuickViewProductId(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigateToProduct(product.id);
   };
 
   return (

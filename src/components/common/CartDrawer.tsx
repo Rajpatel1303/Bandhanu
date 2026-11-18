@@ -14,7 +14,7 @@ export const CartDrawer: React.FC = () => {
     totalCartPrice,
     profile,
     setCurrentPage,
-    setSelectedProductId
+    navigateToProduct
   } = useStore();
 
   if (!isCartOpen) return null;
@@ -104,17 +104,15 @@ Please confirm availability and dispatch timeline. Thank you!`;
                     alt={item.product.title}
                     className="w-18 h-22 object-cover rounded-lg bg-[#F5EFE6] shrink-0 cursor-pointer"
                     onClick={() => {
-                      setSelectedProductId(item.product.id);
                       setIsCartOpen(false);
-                      setCurrentPage('product');
+                      navigateToProduct(item.product.id);
                     }}
                   />
                   <div className="flex-grow min-w-0">
                     <h4
                       onClick={() => {
-                        setSelectedProductId(item.product.id);
                         setIsCartOpen(false);
-                        setCurrentPage('product');
+                        navigateToProduct(item.product.id);
                       }}
                       className="font-serif font-bold text-sm text-[#241E1C] truncate hover:text-[#4A121A] cursor-pointer"
                     >

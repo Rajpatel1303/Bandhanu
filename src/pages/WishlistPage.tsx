@@ -8,7 +8,7 @@ export const WishlistPage: React.FC = () => {
     wishlist,
     products,
     toggleWishlist,
-    setSelectedProductId,
+    navigateToProduct,
     setCurrentPage,
     addToCart
   } = useStore();
@@ -16,9 +16,7 @@ export const WishlistPage: React.FC = () => {
   const savedProducts = products.filter((p) => wishlist.includes(p.id));
 
   const handleProductClick = (productId: string) => {
-    setSelectedProductId(productId);
-    setCurrentPage('product');
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    navigateToProduct(productId);
   };
 
   const handleContinueShopping = () => {
