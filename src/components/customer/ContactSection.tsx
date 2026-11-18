@@ -10,6 +10,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { getWhatsAppDirectUrl } from '../../utils/whatsapp';
 
 export const ContactSection: React.FC = () => {
   const { profile } = useStore();
@@ -97,12 +98,12 @@ Looking forward to connecting with your master artisans!`;
                   <div>
                     <strong className="block text-heritage-charcoal dark:text-white">WhatsApp Hotline:</strong>
                     <a
-                      href={`https://wa.me/${profile.whatsappNumber}`}
+                      href={getWhatsAppDirectUrl(profile.whatsappNumber, 'Hello! I am reaching out from your website.')}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-emerald-700 dark:text-emerald-400 font-semibold hover:underline"
                     >
-                      {profile.displayPhone}
+                      {profile.displayPhone || `+${profile.whatsappNumber}`}
                     </a>
                   </div>
                 </div>
@@ -113,7 +114,12 @@ Looking forward to connecting with your master artisans!`;
                   </div>
                   <div>
                     <strong className="block text-heritage-charcoal dark:text-white">Email Inquiries:</strong>
-                    <span className="text-heritage-charcoal/70 dark:text-gray-400">{profile.email}</span>
+                    <a
+                      href={`mailto:${profile.email}`}
+                      className="text-heritage-charcoal/70 dark:text-gray-400 hover:text-heritage-crimson dark:hover:text-heritage-gold transition-colors font-mono"
+                    >
+                      {profile.email}
+                    </a>
                   </div>
                 </div>
 
@@ -133,10 +139,10 @@ Looking forward to connecting with your master artisans!`;
               {/* Direct WhatsApp Callout Banner */}
               <div className="pt-2">
                 <a
-                  href={`https://wa.me/${profile.whatsappNumber}?text=${encodeURIComponent('Hello! I would like to schedule a virtual video walkthrough of your Bandhani catalogue.')}`}
+                  href={getWhatsAppDirectUrl(profile.whatsappNumber, 'Hello! I would like to schedule a virtual video walkthrough of your Bandhani catalogue.')}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3 px-4 rounded-2xl bg-[#25D366] hover:bg-[#1ebe5d] text-white text-xs font-bold shadow-md flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-3 px-4 rounded-2xl bg-[#25D366] hover:bg-[#1ebe5d] text-white text-xs font-bold shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <MessageCircle className="w-4 h-4 fill-current" />
                   <span>Book Virtual Video Walkthrough</span>

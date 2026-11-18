@@ -190,6 +190,21 @@ export interface SectionToggles {
   showCraftJourney: boolean;
   showTestimonials: boolean;
   showSimilarProducts: boolean;
+  showCustomOrders?: boolean;
+}
+
+export interface SiteCustomOrder {
+  badge: string;
+  heading: string;
+  subtitle: string;
+  description: string;
+  image: string;
+  leadTime: string;
+  whatsappCtaText: string;
+  productTypes?: string[];
+  fabrics: string[];
+  patterns: string[];
+  colors: { name: string; hex: string }[];
 }
 
 export interface CraftStageItem {
@@ -273,5 +288,6 @@ export interface UniversalSiteContent {
   contact: SiteContact;
   toggles: SectionToggles;
   craftJourney?: SiteCraftJourney;
+  customOrder?: SiteCustomOrder;
   theme?: CustomThemeSettings;
 }

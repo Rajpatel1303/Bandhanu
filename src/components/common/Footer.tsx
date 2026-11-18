@@ -20,15 +20,6 @@ export const Footer: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCraftScroll = () => {
-    setSelectedProductId(null);
-    setCurrentPage('home');
-    setTimeout(() => {
-      const el = document.getElementById('our-craft-section');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  };
-
   return (
     <footer
       style={{ backgroundColor: footerBg, color: footerText }}
@@ -60,13 +51,6 @@ export const Footer: React.FC = () => {
               className="hover:text-white transition-colors cursor-pointer px-1 py-1"
             >
               Shop
-            </button>
-            <span className="text-[#F5EFE6]/40 select-none">|</span>
-            <button
-              onClick={handleCraftScroll}
-              className="hover:text-white transition-colors cursor-pointer px-1 py-1"
-            >
-              Our Craft
             </button>
             <span className="text-[#F5EFE6]/40 select-none">|</span>
             <button

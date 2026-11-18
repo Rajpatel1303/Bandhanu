@@ -2,6 +2,7 @@ import React from 'react';
 import { useStore } from '../context/StoreContext';
 import { BandhaniMotifDivider } from '../components/common/BandhaniMotifDivider';
 import { Home, ShoppingBag, MessageCircle, ArrowRight, Compass } from 'lucide-react';
+import { getWhatsAppDirectUrl } from '../utils/whatsapp';
 
 export const NotFoundPage: React.FC = () => {
   const { setCurrentPage, profile, categories } = useStore();
@@ -18,9 +19,10 @@ export const NotFoundPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const conciergeLink = `https://wa.me/${profile.whatsappNumber}?text=${encodeURIComponent(
+  const conciergeLink = getWhatsAppDirectUrl(
+    profile.whatsappNumber,
     'Hello Bandhanu Concierge! 👋 I was looking for a textile on your website that could not be found. Could you please guide me?'
-  )}`;
+  );
 
   return (
     <div className="min-h-[75vh] flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8">

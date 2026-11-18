@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Product, ProductColor, AvailabilityStatus } from '../../types';
 import { useStore } from '../../context/StoreContext';
+import { MediaUploader } from './MediaUploader';
 import {
   X,
   Plus,
@@ -363,37 +364,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
             </h4>
 
             {/* Add Photo Tools */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-              <div className="sm:col-span-8 flex gap-2">
-                <input
-                  type="url"
-                  placeholder="Paste Image URL (https://...)"
-                  value={imageUrlInput}
-                  onChange={e => setImageUrlInput(e.target.value)}
-                  className="flex-1 p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/20 dark:bg-heritage-darkCard text-heritage-charcoal dark:text-white focus:outline-none focus:border-heritage-crimson text-xs"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddImageUrl}
-                  className="px-4 py-2 rounded-xl bg-heritage-crimson text-white font-semibold hover:bg-heritage-ruby"
-                >
-                  Add URL
-                </button>
-              </div>
-
-              <div className="sm:col-span-4">
-                <label className="w-full py-2.5 px-3 rounded-xl border-2 border-dashed border-heritage-gold/50 hover:border-heritage-crimson bg-heritage-sand/30 dark:bg-heritage-darkCard text-heritage-charcoal dark:text-gray-300 font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors text-xs">
-                  <Upload className="w-3.5 h-3.5 text-heritage-crimson" />
-                  <span>Upload Local Photo</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            </div>
+            <MediaUploader
+              folder="products"
+              multiple={true}
+              title="Add Product Photos"
+              onImagesSelected={urls => setImages(prev => [...prev, ...urls])}
+            />
 
             {/* Photos Preview Strip */}
             {images.length > 0 ? (

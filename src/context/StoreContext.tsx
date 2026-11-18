@@ -31,7 +31,7 @@ export const INITIAL_SITE_CONTENT: UniversalSiteContent = {
     text: 'Welcome to Bandhanu • Where Heritage Meets Style',
     subtext: 'Every Knot, A Story',
     ctaText: 'WhatsApp Studio Concierge',
-    ctaLink: 'https://wa.me/919876543210'
+    ctaLink: ''
   },
   hero: {
     badge: 'BANDHANU: EVERY KNOT, A STORY',
@@ -118,6 +118,31 @@ export const INITIAL_SITE_CONTENT: UniversalSiteContent = {
         alt: 'Opened Bandhani silk cloth with signature crinkle bloom',
         caption: 'The revealed crinkled Bandhani bloom with signature texture'
       }
+    ]
+  },
+  customOrder: {
+    badge: 'Bespoke Atelier Service',
+    heading: 'Custom Bandhani Commission',
+    subtitle: 'Tailored Exclusively to Your Color, Fabric & Knot Density',
+    description: 'Have a specific wedding theme, family heirloom motif, or bespoke drape in mind? Our master Khatri artisans tie and dye customized pieces to your exact vision.',
+    image: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1200&q=85',
+    leadTime: '4 to 6 weeks handcrafting lead-time',
+    whatsappCtaText: 'Discuss Custom Commission on WhatsApp',
+    productTypes: [
+      'Bridal Gharchola Saree',
+      'Heirloom Shikargah Dupatta',
+      'Bespoke Kurta & Stole',
+      'Unstitched Silk Fabric (5m)'
+    ],
+    fabrics: ['Pure Gajji Silk', 'Modal Silk', 'Pure Georgette', 'Chanderi Silk', 'Mulberry Katan'],
+    patterns: ['Micro Rai Bandhej (~25,000 knots)', 'Traditional Shikargah', 'Royal Bavan Baug', 'Chaukadi (4-Dot Grid)'],
+    colors: [
+      { name: 'Sindoor Crimson', hex: '#9B111E' },
+      { name: 'Kutch Indigo', hex: '#1F2942' },
+      { name: 'Haldi Ochre', hex: '#D4AF37' },
+      { name: 'Gulabi Rani Pink', hex: '#D12D69' },
+      { name: 'Forest Emerald', hex: '#1A5336' },
+      { name: 'Custom Dye / Ombre', hex: '#C85A32' }
     ]
   },
   theme: {
@@ -236,21 +261,21 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'bandhanu_products_v8',
-  CATEGORIES: 'bandhanu_categories_v8',
-  BANNERS: 'bandhanu_banners_v6',
-  PROFILE: 'bandhanu_profile_v6',
-  ENQUIRIES: 'bandhanu_enquiries_v8',
-  WISHLIST: 'bandhanu_wishlist_v6',
-  CART: 'bandhanu_cart_v6',
-  SITE_CONTENT: 'bandhanu_site_content_v6',
+  PRODUCTS: 'bandhanu_products_v9',
+  CATEGORIES: 'bandhanu_categories_v9',
+  BANNERS: 'bandhanu_banners_v7',
+  PROFILE: 'bandhanu_profile_v7',
+  ENQUIRIES: 'bandhanu_enquiries_v9',
+  WISHLIST: 'bandhanu_wishlist_v7',
+  CART: 'bandhanu_cart_v7',
+  SITE_CONTENT: 'bandhanu_site_content_v7',
   STUDIO_AUTH: 'bandhanu_studio_session'
 };
 
 // Purge legacy mock storage from user browsers
 try {
-  ['v6', 'v7'].forEach(ver => {
-    ['products', 'categories', 'enquiries'].forEach(type => {
+  ['v6', 'v7', 'v8'].forEach(ver => {
+    ['products', 'categories', 'enquiries', 'profile', 'site_content', 'banners', 'cart', 'wishlist'].forEach(type => {
       localStorage.removeItem(`bandhanu_${type}_${ver}`);
     });
   });
@@ -375,7 +400,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [products, setProducts] = useState<Product[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-      return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+      const parsed = saved ? JSON.parse(saved) : null;
+      return Array.isArray(parsed) ? parsed : INITIAL_PRODUCTS;
     } catch {
       return INITIAL_PRODUCTS;
     }
@@ -384,7 +410,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-      return saved ? JSON.parse(saved) : INITIAL_CATEGORIES;
+      const parsed = saved ? JSON.parse(saved) : null;
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_CATEGORIES;
     } catch {
       return INITIAL_CATEGORIES;
     }
@@ -402,7 +429,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [profile, setProfile] = useState<BusinessProfile>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.PROFILE);
-      return saved ? JSON.parse(saved) : INITIAL_BUSINESS_PROFILE;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.whatsappNumber === '919876543210' || !parsed.whatsappNumber) {
+          parsed.whatsappNumber = INITIAL_BUSINESS_PROFILE.whatsappNumber;
+          parsed.displayPhone = INITIAL_BUSINESS_PROFILE.displayPhone;
+        }
+        if (parsed.email === 'concierge@bandhanu.com' || !parsed.email) {
+          parsed.email = INITIAL_BUSINESS_PROFILE.email;
+        }
+        if (parsed.businessName === 'BANDHANU' || !parsed.businessName) {
+          parsed.businessName = INITIAL_BUSINESS_PROFILE.businessName;
+        }
+        return parsed;
+      }
+      return INITIAL_BUSINESS_PROFILE;
     } catch {
       return INITIAL_BUSINESS_PROFILE;
     }
@@ -411,7 +452,23 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [siteContent, setSiteContent] = useState<UniversalSiteContent>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.SITE_CONTENT);
-      return saved ? JSON.parse(saved) : INITIAL_SITE_CONTENT;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.contact) {
+          if (parsed.contact.whatsappNumber === '919876543210' || !parsed.contact.whatsappNumber) {
+            parsed.contact.whatsappNumber = INITIAL_BUSINESS_PROFILE.whatsappNumber;
+            parsed.contact.displayPhone = INITIAL_BUSINESS_PROFILE.displayPhone;
+          }
+          if (parsed.contact.email === 'concierge@bandhanu.com' || !parsed.contact.email) {
+            parsed.contact.email = INITIAL_BUSINESS_PROFILE.email;
+          }
+          if (parsed.contact.businessName === 'BANDHANU' || !parsed.contact.businessName) {
+            parsed.contact.businessName = INITIAL_BUSINESS_PROFILE.businessName;
+          }
+        }
+        return parsed;
+      }
+      return INITIAL_SITE_CONTENT;
     } catch {
       return INITIAL_SITE_CONTENT;
     }
@@ -420,7 +477,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [enquiryLogs, setEnquiryLogs] = useState<EnquiryLog[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.ENQUIRIES);
-      return saved ? JSON.parse(saved) : INITIAL_ENQUIRIES_LOG;
+      const parsed = saved ? JSON.parse(saved) : null;
+      return Array.isArray(parsed) ? parsed : INITIAL_ENQUIRIES_LOG;
     } catch {
       return INITIAL_ENQUIRIES_LOG;
     }
@@ -1004,13 +1062,27 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setProfile(prev => {
       const updated = { ...prev, ...updates };
       localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(updated));
+
+      if (isSupabaseConfigured) {
+        supabase
+          .from('business_profile')
+          .upsert({ id: 'primary', ...updated, updated_at: new Date().toISOString() })
+          .then(({ error }: any) => {
+            if (!error) setDbStatus('connected');
+          });
+      }
       return updated;
     });
 
     // Synchronize to siteContent.contact so CMS and Frontend are 100% aligned
     setSiteContent(prev => {
+      const cleanPhone = (updates.whatsappNumber || prev.contact.whatsappNumber || '').replace(/[^0-9]/g, '');
       const updatedContent: UniversalSiteContent = {
         ...prev,
+        announcement: {
+          ...prev.announcement,
+          ctaLink: cleanPhone ? getWhatsAppDirectUrl(cleanPhone, prev.announcement.text || 'Hello Bandhanu!') : prev.announcement.ctaLink
+        },
         contact: {
           ...prev.contact,
           businessName: updates.businessName ?? prev.contact.businessName,
@@ -1028,10 +1100,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (isSupabaseConfigured) {
         (async () => {
           try {
-            const { error } = await supabase
+            await supabase
               .from('site_content')
               .upsert({ key: 'contact', value: updatedContent.contact, updated_at: new Date().toISOString() });
-            if (!error) setDbStatus('connected');
+            await supabase
+              .from('site_content')
+              .upsert({ key: 'announcement', value: updatedContent.announcement, updated_at: new Date().toISOString() });
+            setDbStatus('connected');
           } catch {
             // safe fallback
           }

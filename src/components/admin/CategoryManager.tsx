@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Category } from '../../types';
 import { useStore } from '../../context/StoreContext';
 import { useNotification } from '../../context/NotificationContext';
+import { MediaUploader } from './MediaUploader';
 import { Plus, Edit2, Trash2, X, Image, Sparkles } from 'lucide-react';
 
 export const CategoryManager: React.FC = () => {
@@ -186,7 +187,7 @@ export const CategoryManager: React.FC = () => {
       {/* Add / Edit Category Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-fade-in overflow-y-auto">
-          <div className="relative w-full max-w-md bg-white dark:bg-heritage-darkSurface rounded-2xl sm:rounded-3xl border border-heritage-gold/40 shadow-2xl p-4 sm:p-6 text-xs space-y-4 max-h-[92vh] overflow-y-auto my-auto">
+          <div className="relative w-full max-w-lg bg-white dark:bg-heritage-darkSurface rounded-2xl sm:rounded-3xl border border-heritage-gold/40 shadow-2xl p-4 sm:p-6 text-xs space-y-4 max-h-[92vh] overflow-y-auto my-auto">
             <div className="flex items-center justify-between pb-3 border-b border-heritage-gold/20">
               <h3 className="font-serif font-bold text-base text-heritage-charcoal dark:text-white">
                 {editingCategory ? 'Edit Category' : 'Create New Category'}
@@ -232,14 +233,28 @@ export const CategoryManager: React.FC = () => {
 
               <div>
                 <label className="block font-semibold text-heritage-charcoal dark:text-gray-200 mb-1">
-                  Category Cover Image URL
+                  Category Cover Image *
                 </label>
-                <input
-                  type="url"
-                  required
-                  value={image}
-                  onChange={e => setImage(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/20 dark:bg-heritage-darkCard text-heritage-charcoal dark:text-white"
+                {image && (
+                  <div className="relative mb-2 h-36 w-full rounded-xl overflow-hidden border border-heritage-gold/30 bg-gray-100 dark:bg-gray-800">
+                    <img src={image} alt="Preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setImage('')}
+                      className="absolute top-2 right-2 p-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-xs"
+                      title="Remove image"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+                <MediaUploader
+                  folder="categories"
+                  multiple={false}
+                  title="Category Cover Photo"
+                  onImagesSelected={urls => {
+                    if (urls[0]) setImage(urls[0]);
+                  }}
                 />
               </div>
 

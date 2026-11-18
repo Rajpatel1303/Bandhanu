@@ -3,7 +3,7 @@ import { useStore } from '../context/StoreContext';
 import { ArrowRight, Heart, Sparkles, MapPin, Leaf, Users, Quote } from 'lucide-react';
 
 export const AboutPage: React.FC = () => {
-  const { siteContent, profile, setCurrentPage, theme } = useStore();
+  const { siteContent, profile, setCurrentPage, setSelectedCategory, theme } = useStore();
 
   const about = siteContent?.about;
   const brandName = profile.businessName || 'Bandhanu';
@@ -44,12 +44,10 @@ export const AboutPage: React.FC = () => {
     }
   ];
 
-  const handleDiscoverCraft = () => {
-    setCurrentPage('home');
-    setTimeout(() => {
-      const craftEl = document.getElementById('our-craft-section');
-      if (craftEl) craftEl.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+  const handleExploreCollection = () => {
+    setSelectedCategory(null);
+    setCurrentPage('catalogue');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -109,10 +107,10 @@ export const AboutPage: React.FC = () => {
 
             <div className="pt-2">
               <button
-                onClick={handleDiscoverCraft}
+                onClick={handleExploreCollection}
                 className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#4A121A] hover:bg-[#380D13] text-white text-xs font-medium tracking-[0.14em] uppercase transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer group"
               >
-                <span>Discover Our Craft</span>
+                <span>Explore Collection</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>

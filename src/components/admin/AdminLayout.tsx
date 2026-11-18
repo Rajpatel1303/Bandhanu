@@ -13,7 +13,8 @@ import {
   ShoppingBag,
   RefreshCw,
   Lock,
-  Palette
+  Palette,
+  Phone
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -42,7 +43,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { tab: 'cms', label: 'Universal Site CMS', icon: Sparkles, badge: 'Full Edit' },
     { tab: 'theme', label: 'Theme & Colors', icon: Palette, badge: 'Live' },
     { tab: 'banners', label: 'Hero Banners', icon: Image },
-    { tab: 'settings', label: 'WhatsApp & Business', icon: Settings }
+    { tab: 'settings', label: 'Contact, Email & WhatsApp', icon: Phone, badge: 'Live Hub' }
   ];
 
   // Calculate total catalogue value
@@ -51,37 +52,39 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-heritage-sand/30 dark:bg-heritage-darkSurface flex flex-col">
       {/* Top Studio Bar */}
-      <header className="sticky top-0 z-30 bg-heritage-darkSurface text-white border-b border-heritage-gold/30 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shadow-lg">
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-heritage-crimson border border-heritage-gold flex items-center justify-center font-serif font-bold text-xs sm:text-base text-heritage-gold shrink-0">
+      <header className="sticky top-0 z-30 bg-heritage-darkSurface text-white border-b border-heritage-gold/30 px-2.5 sm:px-6 py-2 sm:py-3 flex items-center justify-between shadow-lg gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-heritage-crimson border border-heritage-gold flex items-center justify-center font-serif font-bold text-xs sm:text-base text-heritage-gold shrink-0">
             BD
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <h1 className="font-serif font-bold text-xs sm:text-base text-heritage-gold tracking-wide truncate max-w-[150px] sm:max-w-none">
+              <h1 className="font-serif font-bold text-xs sm:text-base text-heritage-gold tracking-wide truncate max-w-[120px] xs:max-w-[170px] sm:max-w-none">
                 {profile.businessName || 'Bandhanu'} Studio Atelier
               </h1>
               {dbStatus === 'connected' ? (
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold border border-emerald-500/30 whitespace-nowrap flex items-center gap-1">
+                <span className="px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] sm:text-[10px] font-bold border border-emerald-500/30 whitespace-nowrap flex items-center gap-1 shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Cloud Live Sync</span>
+                  <span className="hidden sm:inline">Cloud Live Sync</span>
+                  <span className="sm:hidden">Live</span>
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] font-bold border border-teal-500/30 whitespace-nowrap flex items-center gap-1" title="Changes persist automatically in database storage">
+                <span className="px-1.5 sm:px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[9px] sm:text-[10px] font-bold border border-teal-500/30 whitespace-nowrap flex items-center gap-1 shrink-0" title="Changes persist automatically in database storage">
                   <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
-                  <span>Database: Active</span>
+                  <span className="hidden sm:inline">Database: Active</span>
+                  <span className="sm:hidden">Active</span>
                 </span>
               )}
             </div>
-            <p className="text-[9px] sm:text-[10px] text-gray-400 hidden xs:block truncate">
+            <p className="text-[9px] sm:text-[10px] text-gray-400 hidden md:block truncate">
               Catalogue, CMS & WhatsApp Intelligence
             </p>
           </div>
         </div>
 
         {/* Right Stats & Lock / Sign Out */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="hidden md:flex items-center gap-4 text-xs pr-4 border-r border-gray-700">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <div className="hidden lg:flex items-center gap-4 text-xs pr-4 border-r border-gray-700">
             <div>
               <span className="text-gray-400 block text-[10px]">Catalogue Value</span>
               <span className="font-serif font-bold text-heritage-gold">
@@ -96,20 +99,21 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
           <button
             onClick={() => setActiveView('store')}
-            className="flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 rounded-full bg-heritage-gold/20 hover:bg-heritage-gold/30 text-heritage-gold text-[11px] sm:text-xs font-semibold transition-all shrink-0 cursor-pointer"
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-heritage-gold/20 hover:bg-heritage-gold/30 text-heritage-gold text-[10px] sm:text-xs font-semibold transition-all shrink-0 cursor-pointer"
             title="View Storefront"
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span>View Store</span>
+            <span className="hidden xs:inline">View Store</span>
           </button>
 
           <button
             onClick={logoutStudio}
-            className="flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 rounded-full bg-heritage-crimson hover:bg-heritage-ruby text-white text-[11px] sm:text-xs font-semibold shadow-md transition-all shrink-0 cursor-pointer"
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-heritage-crimson hover:bg-heritage-ruby text-white text-[10px] sm:text-xs font-semibold shadow-md transition-all shrink-0 cursor-pointer"
             title="Lock Atelier & Sign Out"
           >
             <Lock className="w-3.5 h-3.5 text-heritage-gold" />
-            <span>Lock & Sign Out</span>
+            <span className="hidden xs:inline">Lock & Sign Out</span>
+            <span className="xs:hidden">Lock</span>
           </button>
         </div>
       </header>

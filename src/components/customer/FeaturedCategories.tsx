@@ -37,11 +37,11 @@ export const FeaturedCategories: React.FC = () => {
         <span className="text-[10px] sm:text-[11px] font-semibold tracking-[0.22em] text-[#6E6259] uppercase block mb-1">
           Shop by Category
         </span>
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 flex-grow">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 flex-grow min-w-0">
             <h2
               style={{ color: titleColor }}
-              className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#241E1C] whitespace-nowrap"
+              className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#241E1C] truncate"
             >
               Explore Our Collection
             </h2>
@@ -49,7 +49,7 @@ export const FeaturedCategories: React.FC = () => {
           </div>
           <button
             onClick={handleViewAll}
-            className="text-xs sm:text-sm font-medium text-[#241E1C] hover:text-[#4A121A] flex items-center gap-1.5 transition-colors cursor-pointer group shrink-0"
+            className="text-xs sm:text-sm font-medium text-[#241E1C] hover:text-[#4A121A] flex items-center gap-1.5 transition-colors cursor-pointer group shrink-0 self-start sm:self-auto"
           >
             <span>View All</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />

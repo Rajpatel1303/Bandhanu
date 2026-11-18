@@ -43,21 +43,6 @@ export const Navbar: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCraftClick = () => {
-    setSelectedProductId(null);
-    if (currentPage !== 'home') {
-      setCurrentPage('home');
-      setTimeout(() => {
-        const craftEl = document.getElementById('our-craft-section');
-        if (craftEl) craftEl.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } else {
-      const craftEl = document.getElementById('our-craft-section');
-      if (craftEl) craftEl.scrollIntoView({ behavior: 'smooth' });
-    }
-    setMobileMenuOpen(false);
-  };
-
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -78,7 +63,11 @@ export const Navbar: React.FC = () => {
           )}
           {announcement.ctaText && (
             <a
-              href={announcement.ctaLink || getWhatsAppDirectUrl(profile.whatsappNumber)}
+              href={
+                announcement.ctaLink && !announcement.ctaLink.includes('wa.me') && !announcement.ctaLink.includes('whatsapp')
+                  ? announcement.ctaLink
+                  : getWhatsAppDirectUrl(profile.whatsappNumber, announcement.text || 'Hello Bandhanu!')
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="underline font-bold hover:text-white transition-colors ml-1"
@@ -111,12 +100,12 @@ export const Navbar: React.FC = () => {
             {/* Left: Classic Typographic Logo connected to Profile Data */}
             <div
               onClick={() => handleNavClick('home')}
-              className="cursor-pointer text-center md:text-left group select-none"
+              className="cursor-pointer text-center md:text-left group select-none min-w-0"
             >
-              <span className="font-serif font-bold text-2xl sm:text-3xl tracking-[0.12em] text-[#4A121A] block leading-none group-hover:text-[#380D13] transition-colors">
+              <span className="font-serif font-bold text-xl xs:text-2xl sm:text-3xl tracking-[0.08em] sm:tracking-[0.12em] text-[#4A121A] block leading-none group-hover:text-[#380D13] transition-colors truncate">
                 {profile.businessName || 'BANDHANU'}
               </span>
-              <span className="block text-[8px] sm:text-[9.5px] tracking-[0.25em] text-[#6E6259] uppercase font-medium mt-1">
+              <span className="block text-[7.5px] sm:text-[9.5px] tracking-[0.18em] sm:tracking-[0.25em] text-[#6E6259] uppercase font-medium mt-1 truncate">
                 {profile.tagline || 'Tie and Dye Textile'}
               </span>
             </div>
@@ -152,13 +141,6 @@ export const Navbar: React.FC = () => {
                 {currentPage === 'catalogue' && (
                   <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#4A121A] rounded-full" />
                 )}
-              </button>
-
-              <button
-                onClick={handleCraftClick}
-                className="text-sm tracking-wide transition-all relative py-1 font-medium text-[#241E1C]/80 hover:text-[#4A121A] cursor-pointer"
-              >
-                Our Craft
               </button>
 
               <button
@@ -293,12 +275,6 @@ export const Navbar: React.FC = () => {
                 }`}
               >
                 Shop
-              </button>
-              <button
-                onClick={handleCraftClick}
-                className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-[#241E1C] hover:bg-[#F5EFE6]"
-              >
-                Our Craft
               </button>
               <button
                 onClick={() => handleNavClick('about')}

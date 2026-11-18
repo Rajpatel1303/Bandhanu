@@ -81,17 +81,17 @@ export const HeroSection: React.FC = () => {
         <BandhaniHeroCanvas />
 
         {/* Content Container */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16 sm:py-24">
-          <div className="flex flex-col items-end text-right ml-auto max-w-xl">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 sm:py-24">
+          <div className="flex flex-col items-center sm:items-end text-center sm:text-right max-w-xl mx-auto sm:ml-auto sm:mr-0">
             {/* Kicker / Tagline */}
-            <span className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-[#F5EFE6] uppercase block mb-3 drop-shadow-xs">
+            <span className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] sm:tracking-[0.25em] text-[#F5EFE6] uppercase block mb-2 sm:mb-3 drop-shadow-xs">
               {badgeText}
             </span>
 
             {/* Headline */}
             <h1
               style={{ color: titleColor }}
-              className="text-3xl sm:text-5xl lg:text-6xl font-serif text-white leading-[1.12] tracking-tight drop-shadow-md"
+              className="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-serif text-white leading-[1.15] sm:leading-[1.12] tracking-tight drop-shadow-md"
             >
               {headingText} {highlightText && <br />}
               {highlightText && (
@@ -100,16 +100,16 @@ export const HeroSection: React.FC = () => {
             </h1>
 
             {/* Subtitle / Description */}
-            <p className="mt-4 sm:mt-5 text-sm sm:text-base text-[#F5EFE6]/90 font-light tracking-wide leading-relaxed drop-shadow-xs">
+            <p className="mt-3 sm:mt-5 text-xs sm:text-base text-[#F5EFE6]/90 font-light tracking-wide leading-relaxed drop-shadow-xs">
               {descriptionText}
             </p>
 
             {/* CTA Buttons */}
-            <div className="mt-7 sm:mt-8 flex flex-wrap items-center justify-end gap-3 sm:gap-4">
+            <div className="mt-6 sm:mt-8 flex flex-col xs:flex-row items-center justify-center sm:justify-end gap-2.5 sm:gap-4 w-full">
               {secondaryBtnText && (
                 <button
                   onClick={handleWhatsAppEnquiry}
-                  className="inline-flex items-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white text-xs sm:text-sm font-medium tracking-[0.14em] uppercase transition-all duration-300 border border-white/20 hover:border-white/40 cursor-pointer"
+                  className="w-full xs:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white text-xs sm:text-sm font-medium tracking-[0.12em] sm:tracking-[0.14em] uppercase transition-all duration-300 border border-white/20 hover:border-white/40 cursor-pointer"
                 >
                   <MessageCircle className="w-4 h-4 fill-white" />
                   <span>{secondaryBtnText}</span>
@@ -119,7 +119,7 @@ export const HeroSection: React.FC = () => {
               <button
                 onClick={handleExplore}
                 style={{ backgroundColor: btnBg, color: btnText }}
-                className="inline-flex items-center gap-2.5 px-7 py-3 sm:px-8 sm:py-3.5 bg-[#4A121A] hover:bg-[#380D13] text-white text-xs sm:text-sm font-medium tracking-[0.14em] uppercase transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 cursor-pointer group"
+                className="w-full xs:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-2.5 sm:px-8 sm:py-3.5 bg-[#4A121A] hover:bg-[#380D13] text-white text-xs sm:text-sm font-medium tracking-[0.12em] sm:tracking-[0.14em] uppercase transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 cursor-pointer group"
               >
                 <span>{primaryBtnText}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />

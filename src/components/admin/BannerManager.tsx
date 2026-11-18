@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Banner } from '../../types';
 import { useStore } from '../../context/StoreContext';
+import { MediaUploader } from './MediaUploader';
 import { Plus, Trash2, Edit2, Check, Sparkles, Image } from 'lucide-react';
 
 export const BannerManager: React.FC = () => {
@@ -97,26 +98,39 @@ export const BannerManager: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block font-semibold mb-1">CTA Button Text</label>
-              <input
-                type="text"
-                value={ctaText}
-                onChange={e => setCtaText(e.target.value)}
-                className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/20 dark:bg-heritage-darkSurface"
-              />
-            </div>
+          <div>
+            <label className="block font-semibold mb-1">CTA Button Text</label>
+            <input
+              type="text"
+              value={ctaText}
+              onChange={e => setCtaText(e.target.value)}
+              className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/20 dark:bg-heritage-darkSurface"
+            />
+          </div>
 
-            <div>
-              <label className="block font-semibold mb-1">Background Image URL</label>
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={e => setImageUrl(e.target.value)}
-                className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/20 dark:bg-heritage-darkSurface"
-              />
-            </div>
+          <div>
+            <label className="block font-semibold mb-1">Banner Background Image</label>
+            {imageUrl && (
+              <div className="relative mb-2 h-28 w-full rounded-xl overflow-hidden border border-heritage-gold/30">
+                <img src={imageUrl} alt="Banner Preview" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl('')}
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-xs"
+                  title="Remove image"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+            <MediaUploader
+              folder="banners"
+              multiple={false}
+              title="Campaign Background Photo"
+              onImagesSelected={urls => {
+                if (urls[0]) setImageUrl(urls[0]);
+              }}
+            />
           </div>
 
           <button

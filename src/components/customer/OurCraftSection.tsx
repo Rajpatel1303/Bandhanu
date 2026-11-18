@@ -138,6 +138,67 @@ export const OurCraftSection: React.FC = () => {
       <div className="pt-2">
         <BandhaniBloomInteractive />
       </div>
+
+      {/* Signature Resisted Techniques Grid */}
+      <div className="pt-6 border-t border-[#E2D7C7]/50">
+        <div className="text-center max-w-xl mx-auto mb-6">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#4A121A] dark:text-heritage-gold block">
+            Signature Resisted Techniques
+          </span>
+          <h3 className="font-serif font-bold text-xl sm:text-2xl text-[#241E1C] dark:text-white mt-1">
+            Master Craftsmanship of Kutch & Jamnagar
+          </h3>
+          <p className="text-xs text-[#6E6259] dark:text-gray-400 mt-1 max-w-md mx-auto">
+            Passed down through generations of Khatri master dyers, each pattern demands distinct hand-tension and tying discipline.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+          {[
+            {
+              name: 'Micro Rai Bandhej',
+              badge: '~25,000 Knots',
+              desc: 'Tiniest mustard-seed dots plucked using nail-rings (Aar) on sheer Gajji silk.',
+              bg: 'bg-heritage-sand/30 dark:bg-heritage-darkCard'
+            },
+            {
+              name: 'Shikargah Jaal',
+              badge: 'Royal Menagerie',
+              desc: 'Complex animal & forest narratives resisted into bridal heirloom Gharcholas.',
+              bg: 'bg-heritage-sand/30 dark:bg-heritage-darkCard'
+            },
+            {
+              name: 'Bavan Baug (52 Gardens)',
+              badge: '52 Master Motifs',
+              desc: 'A geometric grid where every individual square houses a distinct floral bloom.',
+              bg: 'bg-heritage-sand/30 dark:bg-heritage-darkCard'
+            },
+            {
+              name: 'Chaukadi & Trikunti',
+              badge: 'Sacred Diamond Clusters',
+              desc: 'Clusters of 3 and 4 diamond knots signifying protection, abundance, and heritage.',
+              bg: 'bg-heritage-sand/30 dark:bg-heritage-darkCard'
+            }
+          ].map((item, idx) => (
+            <div
+              key={idx}
+              className={`p-4 rounded-2xl border border-heritage-gold/30 ${item.bg} flex flex-col justify-between hover:border-heritage-crimson transition-all group`}
+            >
+              <div>
+                <span className="inline-block px-2 py-0.5 rounded-full bg-heritage-gold/20 text-[#4A121A] dark:text-heritage-gold text-[9px] font-bold uppercase tracking-wider mb-2">
+                  {item.badge}
+                </span>
+                <h4 className="font-serif font-bold text-sm text-[#241E1C] dark:text-white group-hover:text-heritage-crimson transition-colors">
+                  {item.name}
+                </h4>
+                <p className="text-xs text-[#6E6259] dark:text-gray-300 mt-1 leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 };

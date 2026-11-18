@@ -172,8 +172,13 @@ export const ProductList: React.FC = () => {
       {/* Mobile Card List (md:hidden) */}
       <div className="md:hidden space-y-3">
         {filtered.length === 0 ? (
-          <div className="p-8 text-center text-gray-500 bg-white dark:bg-heritage-darkCard rounded-2xl border border-heritage-gold/20">
-            No products match the selected filters.
+          <div className="p-8 text-center text-gray-500 bg-white dark:bg-heritage-darkCard rounded-2xl border border-heritage-gold/20 space-y-2">
+            <p className="font-semibold text-sm text-heritage-charcoal dark:text-gray-200">
+              {products.length === 0 ? 'No products in catalogue yet' : 'No products match the selected filters'}
+            </p>
+            <p className="text-xs text-gray-400">
+              {products.length === 0 ? 'Tap "Add New Bandhani Piece" above to create your first listing.' : 'Try adjusting your search or filters.'}
+            </p>
           </div>
         ) : (
           filtered.map(p => (
@@ -329,11 +334,25 @@ export const ProductList: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-heritage-gold/15">
-              {filtered.map(p => (
-                <tr
-                  key={p.id}
-                  className="hover:bg-heritage-sand/20 dark:hover:bg-heritage-darkSurface/40 transition-colors"
-                >
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-16 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                      <p className="font-semibold text-sm text-heritage-charcoal dark:text-gray-200">
+                        {products.length === 0 ? 'No products in catalogue yet' : 'No products match the selected filters'}
+                      </p>
+                      <p className="text-xs text-gray-400 leading-relaxed">
+                        {products.length === 0 ? 'Click "Add New Bandhani Piece" above to add your first handcrafted creation.' : 'Try adjusting your search query or filters.'}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filtered.map(p => (
+                  <tr
+                    key={p.id}
+                    className="hover:bg-heritage-sand/20 dark:hover:bg-heritage-darkSurface/40 transition-colors"
+                  >
                   {/* Item Image & Title */}
                   <td className="py-3.5 px-4 flex items-center gap-3">
                     <div className="relative w-12 h-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border border-heritage-gold/20 shrink-0">
@@ -466,7 +485,7 @@ export const ProductList: React.FC = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

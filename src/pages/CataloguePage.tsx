@@ -10,8 +10,10 @@ import {
   Check,
   ChevronRight,
   Layers,
-  ArrowUpDown
+  ArrowUpDown,
+  MessageCircle
 } from 'lucide-react';
+import { openWhatsAppDirect } from '../utils/whatsapp';
 
 export const CataloguePage: React.FC = () => {
   const {
@@ -499,21 +501,37 @@ export const CataloguePage: React.FC = () => {
           </div>
         ) : (
           <div className="py-20 text-center rounded-3xl bg-white dark:bg-heritage-darkCard border border-heritage-gold/30 p-8 max-w-lg mx-auto shadow-sm space-y-4">
-            <div className="w-12 h-12 rounded-full bg-heritage-sand/60 text-heritage-crimson flex items-center justify-center mx-auto">
-              <Search className="w-6 h-6" />
+            <div className="w-14 h-14 rounded-2xl bg-heritage-sand/60 text-heritage-crimson flex items-center justify-center mx-auto">
+              {products.length === 0 ? <Sparkles className="w-7 h-7" /> : <Search className="w-6 h-6" />}
             </div>
-            <h3 className="font-serif font-bold text-lg text-heritage-charcoal dark:text-white">
-              No Bandhani creations found
+            <h3 className="font-serif font-bold text-xl text-heritage-charcoal dark:text-white">
+              {products.length === 0 ? 'No Products Available Currently' : 'No Bandhani creations found'}
             </h3>
-            <p className="text-xs text-heritage-charcoal/70 dark:text-gray-400">
-              We couldn't find any pieces matching your active filters. Try adjusting your search query or reset filters.
+            <p className="text-xs sm:text-sm text-heritage-charcoal/70 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+              {products.length === 0
+                ? 'Our master artisans are currently handcrafting our new collection. You can commission bespoke creations or contact our concierge directly on WhatsApp.'
+                : "We couldn't find any pieces matching your active filters. Try adjusting your search query or reset filters."}
             </p>
-            <button
-              onClick={resetAllFilters}
-              className="px-5 py-2 rounded-full bg-heritage-crimson text-white text-xs font-semibold shadow-md"
-            >
-              Clear All Filters
-            </button>
+            <div className="pt-2">
+              {products.length === 0 ? (
+                <button
+                  type="button"
+                  onClick={() => openWhatsAppDirect(profile.whatsappNumber, "Hello Bandhanu! I'd like to enquire about your upcoming collection & bespoke commissions.")}
+                  className="px-6 py-3 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs sm:text-sm font-semibold shadow-md inline-flex items-center gap-2 cursor-pointer transition-all"
+                >
+                  <MessageCircle className="w-4 h-4 fill-current" />
+                  <span>Enquire via WhatsApp Concierge</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="px-5 py-2.5 rounded-full bg-heritage-crimson text-white text-xs font-semibold shadow-md cursor-pointer"
+                >
+                  Clear All Filters
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
