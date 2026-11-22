@@ -29,7 +29,7 @@ export const InstagramGallery: React.FC = () => {
       alt: 'Artisan wearing blue silk saree'
     },
     {
-      src: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80',
+      src: '/images/artisan-knots.jpg',
       alt: 'Hands tying micro knots'
     },
     {

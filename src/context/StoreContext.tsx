@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
   Product,
   Category,
@@ -51,7 +51,7 @@ export const INITIAL_SITE_CONTENT: UniversalSiteContent = {
     headline: 'A Celebration of Tradition, Artistry & Timeless Elegance',
     storyParagraph1: 'Bandhanu is a celebration of tradition, artistry, and timeless elegance. Rooted in the ancient craft of Bandhani (Bandhej), our brand brings forward the beauty of knots, patterns, and indigo hues that tell stories of heritage and culture.',
     storyParagraph2: 'Each piece is hand-tied and hand-dyed, carrying with it the patience, skill, and soul of artisans who have preserved this art for generations. At Bandhanu, we don’t just create products—we create experiences woven with history and designed for modern living.',
-    image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=80',
+    image: '/images/artisan-story.jpg',
     buttonText: 'Read Our Story',
     buttonLink: '',
     locationCity: 'Bhadli',
@@ -110,7 +110,7 @@ export const INITIAL_SITE_CONTENT: UniversalSiteContent = {
         subtitle: 'Capillary Liquid Dye Immersion',
         description: 'The fabric is submerged into warm fermented madder root and pomegranate rind vats. The rich crimson dye bleeds naturally through the porous silk fibers, stopped dead at the bound thread boundary.',
         badge: 'Natural Fermented Dye Vat',
-        image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=85',
+        image: '/images/artisan-pot.jpg',
         alt: 'Natural dye vat process in Kutch',
         caption: 'Sequential immersion in vegetable & madder root dye vats'
       },
@@ -515,6 +515,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           if (!parsed.about.locationMapUrl || parsed.about.locationMapUrl.includes('Darbargadh')) {
             parsed.about.locationMapUrl = 'https://maps.app.goo.gl/86qCkie4AofH5xPQA';
           }
+          if (!parsed.about.image || parsed.about.image.includes('1544816155-12df9643f363')) {
+            parsed.about.image = '/images/artisan-story.jpg';
+          }
         } else {
           parsed.about = INITIAL_SITE_CONTENT.about;
         }
@@ -536,12 +539,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   });
 
+  // Unique tab session ID to prevent echoing messages to ourselves
+  const tabSessionId = useRef(Math.random().toString(36).substring(2, 9));
+
   // BroadcastChannel for instant real-time multi-tab synchronization
   const broadcastSync = (type: string, payload: any) => {
     try {
       if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
         const channel = new BroadcastChannel('bandhanu_tab_sync');
-        channel.postMessage({ type, payload });
+        channel.postMessage({ type, payload, sender: tabSessionId.current });
         channel.close();
       }
     } catch {}
@@ -554,17 +560,20 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
         channel = new BroadcastChannel('bandhanu_tab_sync');
         channel.onmessage = (event) => {
-          const { type, payload } = event.data || {};
+          const { type, payload, sender } = event.data || {};
+          // Ignore messages sent by this same tab session
+          if (sender === tabSessionId.current) return;
+
           if (type === 'SITE_CONTENT' && payload) {
-            setSiteContent(payload);
+            setSiteContent(prev => (JSON.stringify(prev) === JSON.stringify(payload) ? prev : payload));
           } else if (type === 'PRODUCTS' && payload) {
-            setProducts(payload);
+            setProducts(prev => (JSON.stringify(prev) === JSON.stringify(payload) ? prev : payload));
           } else if (type === 'CATEGORIES' && payload) {
-            setCategories(payload);
+            setCategories(prev => (JSON.stringify(prev) === JSON.stringify(payload) ? prev : payload));
           } else if (type === 'PROFILE' && payload) {
-            setProfile(payload);
+            setProfile(prev => (JSON.stringify(prev) === JSON.stringify(payload) ? prev : payload));
           } else if (type === 'BANNERS' && payload) {
-            setBanners(payload);
+            setBanners(prev => (JSON.stringify(prev) === JSON.stringify(payload) ? prev : payload));
           }
         };
       }

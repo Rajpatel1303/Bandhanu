@@ -34,7 +34,7 @@ const DEFAULT_ABOUT = {
   headline: 'A Celebration of Tradition, Artistry & Timeless Elegance',
   storyParagraph1: 'Bandhanu is a celebration of tradition, artistry, and timeless elegance. Rooted in the ancient craft of Bandhani (Bandhej), our brand brings forward the beauty of knots, patterns, and indigo hues that tell stories of heritage and culture.',
   storyParagraph2: 'Each piece is hand-tied and hand-dyed, carrying with it the patience, skill, and soul of artisans who have preserved this art for generations. At Bandhanu, we don’t just create products—we create experiences woven with history and designed for modern living.',
-  image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=80',
+  image: '/images/artisan-story.jpg',
   buttonText: 'Read Our Story',
   buttonLink: '',
   locationCity: 'Bhadli',
@@ -1369,7 +1369,7 @@ export const SiteContentCMS: React.FC = () => {
                     onError={(e) => {
                       (e.target as HTMLElement).setAttribute(
                         'src',
-                        'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=80'
+                        '/images/artisan-story.jpg'
                       );
                     }}
                   />
@@ -1420,14 +1420,13 @@ export const SiteContentCMS: React.FC = () => {
                       ...formData,
                       about: {
                         ...formData.about,
-                        image:
-                          'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=80'
+                        image: '/images/artisan-story.jpg'
                       }
                     })
                   }
                   className="px-2.5 py-1 text-[11px] rounded-lg bg-heritage-sand/50 hover:bg-heritage-sand text-heritage-charcoal dark:text-gray-200 border border-heritage-gold/30 cursor-pointer"
                 >
-                  Artisan Portrait
+                  Artisan Dyeing (Pink Silk)
                 </button>
                 <button
                   type="button"
@@ -1436,14 +1435,13 @@ export const SiteContentCMS: React.FC = () => {
                       ...formData,
                       about: {
                         ...formData.about,
-                        image:
-                          'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1200&q=85'
+                        image: '/images/artisan-pot.jpg'
                       }
                     })
                   }
                   className="px-2.5 py-1 text-[11px] rounded-lg bg-heritage-sand/50 hover:bg-heritage-sand text-heritage-charcoal dark:text-gray-200 border border-heritage-gold/30 cursor-pointer"
                 >
-                  Tying Knots
+                  Artisan at Dye Pot
                 </button>
                 <button
                   type="button"
@@ -1452,14 +1450,13 @@ export const SiteContentCMS: React.FC = () => {
                       ...formData,
                       about: {
                         ...formData.about,
-                        image:
-                          'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=85'
+                        image: '/images/artisan-knots.jpg'
                       }
                     })
                   }
                   className="px-2.5 py-1 text-[11px] rounded-lg bg-heritage-sand/50 hover:bg-heritage-sand text-heritage-charcoal dark:text-gray-200 border border-heritage-gold/30 cursor-pointer"
                 >
-                  Silk Drape
+                  Bandhej Knots Untying
                 </button>
               </div>
             </div>

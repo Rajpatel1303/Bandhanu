@@ -165,7 +165,7 @@ export const ProductDetailPage: React.FC = () => {
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#241E1C] leading-snug">
                 {product.title}
               </h1>
-              <p className="text-xl sm:text-2xl font-serif font-bold text-[#241E1C] mt-2">
+              <p className="text-xl sm:text-2xl font-sans font-semibold text-[#241E1C] tracking-tight mt-2">
                 {formatCurrency(product.price)}
               </p>
               <p className="mt-3 text-xs sm:text-sm text-[#6E6259] leading-relaxed">

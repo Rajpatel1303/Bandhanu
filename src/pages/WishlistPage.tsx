@@ -96,7 +96,7 @@ export const WishlistPage: React.FC = () => {
                     >
                       {product.title}
                     </h3>
-                    <p className="font-serif font-semibold text-xs sm:text-sm text-[#241E1C] mt-1">
+                    <p className="font-sans font-medium text-xs sm:text-sm text-[#241E1C] tracking-tight mt-1">
                       {formatCurrency(product.price)}
                     </p>
                   </div>

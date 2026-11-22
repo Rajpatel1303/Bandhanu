@@ -21,7 +21,7 @@ const DEFAULT_STAGES = [
     subtitle: 'Capillary Liquid Dye Immersion',
     description: 'The fabric is submerged into warm fermented madder root and pomegranate rind vats. The rich crimson dye bleeds naturally through the porous silk fibers, stopped dead at the bound thread boundary.',
     badge: 'Natural Fermented Dye Vat',
-    image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=85',
+    image: '/images/artisan-pot.jpg',
     alt: 'Natural dye vat process in Kutch',
     caption: 'Sequential immersion in vegetable & madder root dye vats'
   },

@@ -252,7 +252,7 @@ export const ProductDetail: React.FC = () => {
             {/* Compact Price Box */}
             <div className="p-3.5 rounded-2xl bg-heritage-sand/40 dark:bg-heritage-darkCard border border-heritage-gold/30">
               <div className="flex items-baseline gap-3">
-                <span className="text-2xl sm:text-3xl font-serif font-bold text-heritage-crimson dark:text-heritage-gold">
+                <span className="text-2xl sm:text-3xl font-sans font-semibold tracking-tight text-heritage-crimson dark:text-heritage-gold">
                   {profile.currencySymbol}
                   {product.price.toLocaleString('en-IN')}
                 </span>
@@ -477,7 +477,7 @@ export const ProductDetail: React.FC = () => {
                     <h4 className="font-serif font-bold text-sm text-heritage-charcoal dark:text-white line-clamp-1 group-hover:text-heritage-crimson">
                       {rp.title}
                     </h4>
-                    <p className="text-sm font-bold text-heritage-crimson dark:text-heritage-gold mt-1">
+                    <p className="text-sm font-sans font-medium text-heritage-crimson dark:text-heritage-gold mt-1">
                       {profile.currencySymbol}
                       {rp.price.toLocaleString('en-IN')}
                     </p>
@@ -494,7 +494,7 @@ export const ProductDetail: React.FC = () => {
         <div>
           <div className="text-[10px] text-gray-500 font-medium leading-none mb-1">Total Price</div>
           <div className="flex items-baseline gap-1.5">
-            <span className="font-serif font-bold text-lg text-heritage-crimson dark:text-heritage-gold">
+            <span className="font-sans font-semibold text-lg text-heritage-crimson dark:text-heritage-gold">
               {profile.currencySymbol}{product.price.toLocaleString('en-IN')}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (

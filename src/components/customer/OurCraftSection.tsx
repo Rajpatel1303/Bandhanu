@@ -35,7 +35,7 @@ export const OurCraftSection: React.FC = () => {
       step: '02',
       title: 'Dyeing (Rangai)',
       subtitle: 'Natural colours, lasting beauty',
-      image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80',
+      image: '/images/artisan-pot.jpg',
     },
     {
       step: '03',

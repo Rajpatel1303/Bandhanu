@@ -19,8 +19,9 @@ export const OurStorySection: React.FC = () => {
     `${profile.businessName || 'Bandhanu'} is a celebration of tradition, artistry, and timeless elegance. Rooted in the ancient craft of Bandhani (Bandhej), our brand brings forward the beauty of knots, patterns, and indigo hues that tell stories of heritage and culture.`;
 
   const image =
-    about?.image ||
-    'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=80';
+    about?.image && !about.image.includes('1544816155-12df9643f363')
+      ? about.image
+      : '/images/artisan-story.jpg';
   const buttonText = about?.buttonText || 'Read Our Story';
   const buttonLink = about?.buttonLink || '';
   const locationCity = about?.locationCity || profile.city || 'Bhadli';

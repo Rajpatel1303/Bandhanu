@@ -64,7 +64,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <h3 className="font-serif text-sm sm:text-base text-[#241E1C] group-hover:text-[#4A121A] transition-colors truncate">
             {product.title}
           </h3>
-          <p className="font-serif font-semibold text-xs sm:text-sm text-[#241E1C] mt-0.5">
+          <p className="font-sans font-medium text-xs sm:text-sm text-[#241E1C] tracking-tight mt-0.5">
             {formatCurrency(product.price)}
           </p>
         </div>

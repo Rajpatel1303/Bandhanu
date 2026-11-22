@@ -89,7 +89,7 @@ export const QuickViewModal: React.FC = () => {
             </p>
 
             <div className="my-3 flex items-baseline gap-2">
-              <span className="text-2xl font-serif font-bold text-heritage-crimson dark:text-heritage-gold">
+              <span className="text-2xl font-sans font-semibold tracking-tight text-heritage-crimson dark:text-heritage-gold">
                 {profile.currencySymbol}
                 {product.price.toLocaleString('en-IN')}
               </span>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Product, ProductColor, AvailabilityStatus } from '../../types';
 import { useStore } from '../../context/StoreContext';
 import { MediaUploader } from './MediaUploader';
@@ -73,35 +73,45 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   ]);
   const [newFeatureInput, setNewFeatureInput] = useState('');
 
-  // Populate fields when editing
+  const prevIsOpenRef = useRef(false);
+
+  // Populate fields when editing or modal opens
   useEffect(() => {
+    if (!isOpen) {
+      prevIsOpenRef.current = false;
+      return;
+    }
+
+    const justOpened = !prevIsOpenRef.current && isOpen;
+    prevIsOpenRef.current = true;
+
     if (productToEdit) {
-      setTitle(productToEdit.title);
-      setSubtitle(productToEdit.subtitle);
-      setSku(productToEdit.sku);
-      setCategory(productToEdit.category);
+      setTitle(productToEdit.title || '');
+      setSubtitle(productToEdit.subtitle || '');
+      setSku(productToEdit.sku || '');
+      setCategory(productToEdit.category || 'sarees');
       setSubCategory(productToEdit.subCategory || '');
-      setPrice(productToEdit.price);
+      setPrice(productToEdit.price || 0);
       setOriginalPrice(productToEdit.originalPrice);
-      setFabric(productToEdit.fabric);
-      setCraftTechnique(productToEdit.craftTechnique);
+      setFabric(productToEdit.fabric || '');
+      setCraftTechnique(productToEdit.craftTechnique || '');
       setKnotCount(productToEdit.knotCount || '');
-      setAvailability(productToEdit.availability);
+      setAvailability(productToEdit.availability || 'in_stock');
       setLeadTime(productToEdit.leadTime || '');
-      setIsFeatured(productToEdit.isFeatured);
-      setIsNewDrop(productToEdit.isNewDrop || false);
-      setDescription(productToEdit.description);
-      setWashCare(productToEdit.washCare);
+      setIsFeatured(productToEdit.isFeatured || false);
+      setIsNewDrop(productToEdit.isNewDrop ?? true);
+      setDescription(productToEdit.description || '');
+      setWashCare(productToEdit.washCare || 'Strictly dry clean only.');
       setDimensions(productToEdit.dimensions || '');
       setImages(productToEdit.images || []);
       setColors(productToEdit.colors || []);
       setFeatures(productToEdit.features || []);
-    } else {
-      // Clean blank defaults for new product
+    } else if (justOpened) {
+      // Clean blank defaults for new product — ONLY upon initial opening!
       setTitle('');
       setSubtitle('');
       setSku(`BD-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`);
-      setCategory(categories[0]?.slug || '');
+      setCategory(categories[0]?.slug || 'sarees');
       setSubCategory('');
       setPrice(0);
       setOriginalPrice(undefined);
@@ -119,7 +129,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       setColors([]);
       setFeatures([]);
     }
-  }, [productToEdit, isOpen, categories]);
+  }, [productToEdit, isOpen]);
 
   if (!isOpen) return null;
 
