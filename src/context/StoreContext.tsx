@@ -51,6 +51,13 @@ export const INITIAL_SITE_CONTENT: UniversalSiteContent = {
     headline: 'A Celebration of Tradition, Artistry & Timeless Elegance',
     storyParagraph1: 'Bandhanu is a celebration of tradition, artistry, and timeless elegance. Rooted in the ancient craft of Bandhani (Bandhej), our brand brings forward the beauty of knots, patterns, and indigo hues that tell stories of heritage and culture.',
     storyParagraph2: 'Each piece is hand-tied and hand-dyed, carrying with it the patience, skill, and soul of artisans who have preserved this art for generations. At Bandhanu, we don’t just create products—we create experiences woven with history and designed for modern living.',
+    image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=80',
+    buttonText: 'Read Our Story',
+    buttonLink: '',
+    locationCity: 'Bhadli',
+    locationState: 'Kutch, Gujarat',
+    locationTagline: 'Visit Our Heritage Atelier • Get Directions',
+    locationMapUrl: 'https://maps.app.goo.gl/86qCkie4AofH5xPQA',
     quoteText: 'Every knot we tie is not just a design—it’s a promise of authenticity, sustainability, and love for handmade.',
     quoteAuthor: 'Bandhanu: Every Knot, A Story.',
     visionPillar1Title: 'Global Identity',
@@ -249,7 +256,8 @@ interface StoreContextType {
 
   // WhatsApp Enquiry Flow
   generateWhatsAppUrl: (product: Product, selectedColorName?: string) => string;
-  triggerWhatsAppEnquiry: (product: Product, selectedColorName?: string) => void;
+  triggerWhatsAppEnquiry: (product: Product, selectedColorName?: string, quantity?: number) => void;
+  triggerMultiProductEnquiry: (items: Product[]) => void;
 
   // Management Utilities
   resetToDemo: () => void;
@@ -260,21 +268,51 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
+export const safeSetStorage = (key: string, value: string): boolean => {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    console.warn(`LocalStorage quota reached when saving ${key}. Purging non-essential media cache...`, e);
+    try {
+      localStorage.removeItem('bandhanu_media_library');
+      localStorage.setItem(key, value);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+};
+
+const getStored = (key: string, legacyKey?: string): string | null => {
+  try {
+    const val = localStorage.getItem(key);
+    if (val) return val;
+    if (legacyKey) {
+      const leg = localStorage.getItem(legacyKey);
+      if (leg) return leg;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
 const STORAGE_KEYS = {
-  PRODUCTS: 'bandhanu_products_v9',
-  CATEGORIES: 'bandhanu_categories_v9',
-  BANNERS: 'bandhanu_banners_v7',
-  PROFILE: 'bandhanu_profile_v7',
-  ENQUIRIES: 'bandhanu_enquiries_v9',
-  WISHLIST: 'bandhanu_wishlist_v7',
-  CART: 'bandhanu_cart_v7',
-  SITE_CONTENT: 'bandhanu_site_content_v7',
+  PRODUCTS: 'bandhanu_products_v11',
+  CATEGORIES: 'bandhanu_categories_v10',
+  BANNERS: 'bandhanu_banners_v10',
+  PROFILE: 'bandhanu_profile_v10',
+  ENQUIRIES: 'bandhanu_enquiries_v10',
+  WISHLIST: 'bandhanu_wishlist_v10',
+  CART: 'bandhanu_cart_v10',
+  SITE_CONTENT: 'bandhanu_site_content_v10',
   STUDIO_AUTH: 'bandhanu_studio_session'
 };
 
-// Purge legacy mock storage from user browsers
+// Purge truly obsolete legacy mock storage versions (never active versions)
 try {
-  ['v6', 'v7', 'v8'].forEach(ver => {
+  ['v1', 'v2', 'v3', 'v4', 'v5'].forEach(ver => {
     ['products', 'categories', 'enquiries', 'profile', 'site_content', 'banners', 'cart', 'wishlist'].forEach(type => {
       localStorage.removeItem(`bandhanu_${type}_${ver}`);
     });
@@ -324,7 +362,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Wishlist State
   const [wishlist, setWishlist] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.WISHLIST);
+      const saved = getStored(STORAGE_KEYS.WISHLIST, 'bandhanu_wishlist_v7');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -334,7 +372,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Cart State
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.CART);
+      const saved = getStored(STORAGE_KEYS.CART, 'bandhanu_cart_v7');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -343,7 +381,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
+    safeSetStorage(STORAGE_KEYS.CART, JSON.stringify(cart));
   }, [cart]);
 
   const addToCart = (product: Product, quantity: number = 1, selectedColor?: string) => {
@@ -399,9 +437,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Persistent Domain States (Local cache defaults)
   const [products, setProducts] = useState<Product[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+      const saved = getStored(STORAGE_KEYS.PRODUCTS, 'bandhanu_products_v9');
       const parsed = saved ? JSON.parse(saved) : null;
-      return Array.isArray(parsed) ? parsed : INITIAL_PRODUCTS;
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_PRODUCTS;
     } catch {
       return INITIAL_PRODUCTS;
     }
@@ -409,7 +447,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
+      const saved = getStored(STORAGE_KEYS.CATEGORIES, 'bandhanu_categories_v9');
       const parsed = saved ? JSON.parse(saved) : null;
       return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_CATEGORIES;
     } catch {
@@ -419,7 +457,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [banners, setBanners] = useState<Banner[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.BANNERS);
+      const saved = getStored(STORAGE_KEYS.BANNERS, 'bandhanu_banners_v7');
       return saved ? JSON.parse(saved) : INITIAL_BANNERS;
     } catch {
       return INITIAL_BANNERS;
@@ -428,7 +466,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [profile, setProfile] = useState<BusinessProfile>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.PROFILE);
+      const saved = getStored(STORAGE_KEYS.PROFILE, 'bandhanu_profile_v7');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.whatsappNumber === '919876543210' || !parsed.whatsappNumber) {
@@ -451,7 +489,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [siteContent, setSiteContent] = useState<UniversalSiteContent>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.SITE_CONTENT);
+      const saved = getStored(STORAGE_KEYS.SITE_CONTENT, 'bandhanu_site_content_v7');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed?.contact) {
@@ -466,6 +504,20 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             parsed.contact.businessName = INITIAL_BUSINESS_PROFILE.businessName;
           }
         }
+        if (parsed?.about) {
+          parsed.about = {
+            ...INITIAL_SITE_CONTENT.about,
+            ...parsed.about
+          };
+          if (!parsed.about.locationTagline || parsed.about.locationTagline.includes('Humse') || parsed.about.locationTagline === 'The Artisan Heartland') {
+            parsed.about.locationTagline = 'Visit Our Heritage Atelier • Get Directions';
+          }
+          if (!parsed.about.locationMapUrl || parsed.about.locationMapUrl.includes('Darbargadh')) {
+            parsed.about.locationMapUrl = 'https://maps.app.goo.gl/86qCkie4AofH5xPQA';
+          }
+        } else {
+          parsed.about = INITIAL_SITE_CONTENT.about;
+        }
         return parsed;
       }
       return INITIAL_SITE_CONTENT;
@@ -476,7 +528,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [enquiryLogs, setEnquiryLogs] = useState<EnquiryLog[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.ENQUIRIES);
+      const saved = getStored(STORAGE_KEYS.ENQUIRIES, 'bandhanu_enquiries_v9');
       const parsed = saved ? JSON.parse(saved) : null;
       return Array.isArray(parsed) ? parsed : INITIAL_ENQUIRIES_LOG;
     } catch {
@@ -484,49 +536,87 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   });
 
+  // BroadcastChannel for instant real-time multi-tab synchronization
+  const broadcastSync = (type: string, payload: any) => {
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        const channel = new BroadcastChannel('bandhanu_tab_sync');
+        channel.postMessage({ type, payload });
+        channel.close();
+      }
+    } catch {}
+  };
+
+  // Listen for real-time changes across open browser tabs
+  useEffect(() => {
+    let channel: BroadcastChannel | null = null;
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        channel = new BroadcastChannel('bandhanu_tab_sync');
+        channel.onmessage = (event) => {
+          const { type, payload } = event.data || {};
+          if (type === 'SITE_CONTENT' && payload) {
+            setSiteContent(payload);
+          } else if (type === 'PRODUCTS' && payload) {
+            setProducts(payload);
+          } else if (type === 'CATEGORIES' && payload) {
+            setCategories(payload);
+          } else if (type === 'PROFILE' && payload) {
+            setProfile(payload);
+          } else if (type === 'BANNERS' && payload) {
+            setBanners(payload);
+          }
+        };
+      }
+    } catch {}
+
+    const handleStorage = (e: StorageEvent) => {
+      if ((e.key === STORAGE_KEYS.SITE_CONTENT || e.key === 'bandhanu_site_content_v7') && e.newValue) {
+        try {
+          setSiteContent(JSON.parse(e.newValue));
+        } catch {}
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      if (channel) channel.close();
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
+
   // Sync to LocalStorage Cache (with safe quota handling)
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
-    } catch (e) {
-      console.warn('LocalStorage quota notice:', e);
-    }
+    safeSetStorage(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+    broadcastSync('PRODUCTS', products);
   }, [products]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
-    } catch {}
+    safeSetStorage(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    broadcastSync('CATEGORIES', categories);
   }, [categories]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.BANNERS, JSON.stringify(banners));
-    } catch {}
+    safeSetStorage(STORAGE_KEYS.BANNERS, JSON.stringify(banners));
+    broadcastSync('BANNERS', banners);
   }, [banners]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
-    } catch {}
+    safeSetStorage(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
+    broadcastSync('PROFILE', profile);
   }, [profile]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(siteContent));
-    } catch {}
+    safeSetStorage(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(siteContent));
+    broadcastSync('SITE_CONTENT', siteContent);
   }, [siteContent]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.ENQUIRIES, JSON.stringify(enquiryLogs));
-    } catch {}
+    safeSetStorage(STORAGE_KEYS.ENQUIRIES, JSON.stringify(enquiryLogs));
   }, [enquiryLogs]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.WISHLIST, JSON.stringify(wishlist));
-    } catch {}
+    safeSetStorage(STORAGE_KEYS.WISHLIST, JSON.stringify(wishlist));
   }, [wishlist]);
 
   // Dynamic Theme Management
@@ -621,18 +711,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         ]);
 
         let connectedToD1 = false;
+        const isJson = (res: Response) => res.headers.get('content-type')?.includes('application/json');
 
         // Process Products
-        if (prodRes.status === 'fulfilled' && prodRes.value.ok) {
+        if (prodRes.status === 'fulfilled' && prodRes.value.ok && isJson(prodRes.value)) {
           const json = await prodRes.value.json();
-          if (json.success && Array.isArray(json.data)) {
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
             setProducts(json.data);
             connectedToD1 = true;
           }
         }
 
         // Process Categories
-        if (catRes.status === 'fulfilled' && catRes.value.ok) {
+        if (catRes.status === 'fulfilled' && catRes.value.ok && isJson(catRes.value)) {
           const json = await catRes.value.json();
           if (json.success && Array.isArray(json.data) && json.data.length > 0) {
             setCategories(json.data);
@@ -641,7 +732,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
 
         // Process Profile
-        if (profRes.status === 'fulfilled' && profRes.value.ok) {
+        if (profRes.status === 'fulfilled' && profRes.value.ok && isJson(profRes.value)) {
           const json = await profRes.value.json();
           if (json.success && json.data && json.data.whatsappNumber) {
             setProfile(prev => ({ ...prev, ...json.data }));
@@ -650,7 +741,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
 
         // Process Site Content
-        if (contentRes.status === 'fulfilled' && contentRes.value.ok) {
+        if (contentRes.status === 'fulfilled' && contentRes.value.ok && isJson(contentRes.value)) {
           const json = await contentRes.value.json();
           if (json.success && json.data && Object.keys(json.data).length > 0) {
             setSiteContent(prev => ({ ...prev, ...json.data }));
@@ -659,7 +750,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
 
         // Process Enquiries
-        if (enqRes.status === 'fulfilled' && enqRes.value.ok) {
+        if (enqRes.status === 'fulfilled' && enqRes.value.ok && isJson(enqRes.value)) {
           const json = await enqRes.value.json();
           if (json.success && Array.isArray(json.data)) {
             setEnquiryLogs(json.data);
@@ -855,9 +946,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Content CMS Update with Supabase & Cloudflare D1 Cloud Sync
   const updateSiteContent = async (newContent: UniversalSiteContent) => {
     setSiteContent(newContent);
-    try {
-      localStorage.setItem(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(newContent));
-    } catch {}
+    safeSetStorage(STORAGE_KEYS.SITE_CONTENT, JSON.stringify(newContent));
+    broadcastSync('SITE_CONTENT', newContent);
     notify.success('CMS Content Saved', 'Storefront sections and copy updated.');
 
     // Sync profile
@@ -1292,7 +1382,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return getWhatsAppDirectUrl(cleanNumber, message);
   };
 
-  const triggerWhatsAppEnquiry = (product: Product, selectedColorName?: string) => {
+  const triggerWhatsAppEnquiry = (product: Product, selectedColorName?: string, quantity: number = 1) => {
     const chosenColor = selectedColorName || product.colors?.[0]?.name || 'Standard Shade';
     const newLog: EnquiryLog = {
       id: `enq-${Date.now()}`,
@@ -1327,7 +1417,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           product_title: product.title,
           customer_phone: 'Direct WhatsApp',
           category: product.category,
-          notes: `Inquiry for ${newLog.color} shade`,
+          notes: `Inquiry for ${newLog.color} shade (Qty: ${quantity})`,
           created_at: newLog.timestamp
         });
       } catch (err) {
@@ -1343,6 +1433,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       .replace('{color}', chosenColor)
       .replace('{url}', currentUrl);
 
+    if (quantity > 1) {
+      message += `\n✦ Quantity: ${quantity}`;
+      message += `\n✦ Estimated Total: ${profile.currencySymbol}${(product.price * quantity).toLocaleString('en-IN')}`;
+    }
+
     message += `\n✦ Craft: ${product.craftTechnique}`;
     if (product.knotCount) {
       message += `\n✦ Knots: ${product.knotCount}`;
@@ -1350,6 +1445,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     notify.royal('Opening WhatsApp Concierge', `Connecting you to reserve ${product.title}...`);
     // Direct jump into WhatsApp chat section (skips api.whatsapp.com landing page)
+    openWhatsAppDirect(profile.whatsappNumber, message);
+  };
+
+  const triggerMultiProductEnquiry = (items: Product[]) => {
+    if (items.length === 0) return;
+    let message = `Hello ${profile.businessName || 'Bandhanu'} Concierge!\n\nI am interested in reserving the following handcrafted pieces from my curated Wishlist:\n`;
+    items.forEach((item, idx) => {
+      message += `\n${idx + 1}. *${item.title}* (SKU: ${item.sku})\n   Price: ${profile.currencySymbol}${item.price.toLocaleString('en-IN')}`;
+      if (item.craftTechnique) message += ` | ${item.craftTechnique}`;
+    });
+    const totalVal = items.reduce((sum, p) => sum + p.price, 0);
+    message += `\n\n✦ *Total Estimated Value:* ${profile.currencySymbol}${totalVal.toLocaleString('en-IN')}\n\nPlease let me know availability, craftsmanship details, and dispatch timeframe. Thank you!`;
+    notify.royal('Opening WhatsApp Concierge', `Connecting you to enquire about ${items.length} wishlist pieces...`);
     openWhatsAppDirect(profile.whatsappNumber, message);
   };
 
@@ -1460,6 +1568,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateProfile,
         generateWhatsAppUrl,
         triggerWhatsAppEnquiry,
+        triggerMultiProductEnquiry,
         resetToDemo,
         clearAllProducts,
         exportDatabase,

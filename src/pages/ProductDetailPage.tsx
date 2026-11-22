@@ -3,6 +3,7 @@ import { useStore } from '../context/StoreContext';
 import { useNotification } from '../context/NotificationContext';
 import { ProductCard } from '../components/customer/ProductCard';
 import { BandhaniMotifDivider } from '../components/common/BandhaniMotifDivider';
+import confetti from 'canvas-confetti';
 import {
   ArrowLeft,
   Heart,
@@ -13,7 +14,8 @@ import {
   ChevronUp,
   Sparkles,
   Share2,
-  Check
+  Check,
+  MessageCircle
 } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 
@@ -25,7 +27,7 @@ export const ProductDetailPage: React.FC = () => {
     setCurrentPage,
     isWishlisted,
     toggleWishlist,
-    addToCart,
+    triggerWhatsAppEnquiry,
     setSelectedCategory,
     profile
   } = useStore();
@@ -72,9 +74,7 @@ export const ProductDetailPage: React.FC = () => {
     'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1000&q=85'
   ];
 
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
-  };
+
 
   const handleShare = () => {
     if (navigator.clipboard) {
@@ -223,14 +223,22 @@ export const ProductDetailPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Action Buttons: Add to Cart (Solid Maroon) & Wishlist */}
+            {/* Action Buttons: Order via WhatsApp & Wishlist */}
             <div className="flex items-center gap-3 pt-2">
               <button
-                onClick={handleAddToCart}
-                className="flex-grow py-3.5 px-6 bg-[#4A121A] hover:bg-[#380D13] text-white text-xs sm:text-sm font-medium tracking-[0.14em] uppercase transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer group"
+                onClick={() => {
+                  confetti({
+                    particleCount: 35,
+                    spread: 60,
+                    origin: { y: 0.6 },
+                    colors: ['#25D366', '#D4AF37', '#4A121A']
+                  });
+                  triggerWhatsAppEnquiry(product, undefined, quantity);
+                }}
+                className="flex-grow py-3.5 px-6 bg-[#25D366] hover:bg-[#20ba59] active:scale-[0.99] text-white text-xs sm:text-sm font-semibold tracking-wide uppercase transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2.5 cursor-pointer rounded-sm"
               >
-                <span>Add to Cart</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <MessageCircle className="w-4 h-4 fill-current" />
+                <span>Enquire & Order on WhatsApp</span>
               </button>
 
               <button
@@ -265,84 +273,75 @@ export const ProductDetailPage: React.FC = () => {
                     <p>• <strong>Technique:</strong> {product.craftTechnique || 'Authentic Hand-Tied Rai Bandhej'}</p>
                     {product.knotCount && <p>• <strong>Knot Density:</strong> {product.knotCount}</p>}
                     {product.dimensions && <p>• <strong>Dimensions:</strong> {product.dimensions}</p>}
-                    <p>• Hand-finished with traditional zari selvedge and tassels.</p>
                   </div>
                 )}
               </div>
 
-              {/* Shipping & Returns */}
+              {/* Shipping Information */}
               <div className="border-b border-[#E2D7C7]/60 pb-3">
                 <button
                   onClick={() => toggleAccordion('shipping')}
                   className="w-full flex items-center justify-between text-xs sm:text-sm font-serif font-bold text-[#241E1C] hover:text-[#4A121A] py-1 text-left"
                 >
-                  <span>Shipping & Returns</span>
+                  <span>Shipping Information</span>
                   <span className="text-base font-normal">
                     {openAccordion === 'shipping' ? '−' : '+'}
                   </span>
                 </button>
                 {openAccordion === 'shipping' && (
                   <div className="pt-2 text-xs text-[#6E6259] space-y-1.5 leading-relaxed animate-fade-in">
-                    <p>• Complimentary express insured courier across India (3–5 working days).</p>
-                    <p>• Worldwide priority dispatch via DHL Express (5–7 working days).</p>
-                    <p>• Easy 7-day return / exchange policy on un-stitched original items.</p>
+                    <p>• Complimentary shipping across India via DTDC or another trusted courier partner.</p>
+                    <p>• Orders are dispatched within 1–2 working days, with an estimated delivery time of 3–4 working days after dispatch.</p>
                   </div>
                 )}
               </div>
 
-              {/* Care Instructions */}
+              {/* Return & Exchange Policy */}
+              <div className="border-b border-[#E2D7C7]/60 pb-3">
+                <button
+                  onClick={() => toggleAccordion('returns')}
+                  className="w-full flex items-center justify-between text-xs sm:text-sm font-serif font-bold text-[#241E1C] hover:text-[#4A121A] py-1 text-left"
+                >
+                  <span>Return & Exchange Policy</span>
+                  <span className="text-base font-normal">
+                    {openAccordion === 'returns' ? '−' : '+'}
+                  </span>
+                </button>
+                {openAccordion === 'returns' && (
+                  <div className="pt-2 text-xs text-[#6E6259] space-y-2 leading-relaxed animate-fade-in">
+                    <p>• We do not accept returns or exchanges for reasons such as colour preference, change of mind or incorrect size selection.</p>
+                    <p>• Returns are accepted only for products received in a damaged condition.</p>
+                    <p>• Any damage must be reported within 48 hours of delivery, along with clear photographs or an unboxing video.</p>
+                    <p>• <strong>Handcrafted Variations:</strong> Slight variations in colour, pattern and dots are natural characteristics of handmade Bandhani and are not considered defects.</p>
+                    <p>• <strong>Custom Orders:</strong> Customised and made-to-order products are non-returnable and non-exchangeable.</p>
+                    <p>• <strong>Delivery Address:</strong> Customers are responsible for providing the correct and complete shipping address and contact number.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Care Instructions & Wash Care */}
               <div className="border-b border-[#E2D7C7]/60 pb-3">
                 <button
                   onClick={() => toggleAccordion('care')}
                   className="w-full flex items-center justify-between text-xs sm:text-sm font-serif font-bold text-[#241E1C] hover:text-[#4A121A] py-1 text-left"
                 >
-                  <span>Care Instructions</span>
+                  <span>Care Instructions & Wash Care</span>
                   <span className="text-base font-normal">
                     {openAccordion === 'care' ? '−' : '+'}
                   </span>
                 </button>
                 {openAccordion === 'care' && (
                   <div className="pt-2 text-xs text-[#6E6259] space-y-1.5 leading-relaxed animate-fade-in">
-                    <p>• Strictly dry clean only to preserve natural vegetable and mineral dyes.</p>
-                    <p>• Store wrapped in breathable unbleached muslin cloth away from dampness.</p>
-                    <p>• Avoid spraying perfume or water directly on pure metallic gold zari.</p>
+                    <p>• Strictly dry clean only to preserve the colours and delicate Bandhani craftsmanship.</p>
+                    <p>• Do not machine wash or hand wash to protect the fine hand-tied knots and fabric texture.</p>
+                    <p>• Dry in shade and avoid prolonged exposure to direct sunlight to maintain colour vibrancy.</p>
+                    <p>• Store wrapped in a clean, breathable cotton or muslin cloth, away from moisture and dampness.</p>
+                    <p>• Avoid spraying perfumes, deodorants or harsh chemicals directly onto the fabric.</p>
                   </div>
                 )}
               </div>
             </div>
 
-          </div>
-        </div>
-
-        {/* Editorial Split Banner matching Image 2 */}
-        <div className="my-16 sm:my-24 grid grid-cols-1 md:grid-cols-2 overflow-hidden border border-[#E2D7C7]">
-          {/* Left: Close-up Texture Visual */}
-          <div className="h-44 sm:h-56 relative bg-white overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=85"
-              alt="Bandhani dots texture"
-              className="w-full h-full object-cover object-center"
-            />
-          </div>
-
-          {/* Right: Deep Maroon Editorial Bar */}
-          <div className="bg-[#4A121A] text-white p-8 sm:p-12 flex items-center justify-center text-center relative overflow-hidden">
-            {/* Ambient Bandhani Dot Cluster Background */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
-              <svg viewBox="0 0 100 100" className="w-80 h-80 fill-none stroke-current animate-pulse-subtle">
-                <circle cx="50" cy="50" r="40" strokeWidth="0.5" strokeDasharray="3,3" />
-                <circle cx="50" cy="50" r="25" strokeWidth="0.8" />
-                <circle cx="50" cy="50" r="10" strokeWidth="1" />
-                <circle cx="50" cy="15" r="3" fill="currentColor" />
-                <circle cx="50" cy="85" r="3" fill="currentColor" />
-                <circle cx="15" cy="50" r="3" fill="currentColor" />
-                <circle cx="85" cy="50" r="3" fill="currentColor" />
-              </svg>
-            </div>
-
-            <blockquote className="font-serif italic text-xl sm:text-2xl lg:text-3xl font-light tracking-wide max-w-md relative z-10">
-              "A piece of tradition, woven for today."
-            </blockquote>
           </div>
         </div>
 

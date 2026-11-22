@@ -120,7 +120,7 @@ export const AboutPage: React.FC = () => {
           <div className="lg:col-span-6">
             <div className="relative aspect-[4/3] sm:aspect-[16/11] overflow-hidden border border-[#E2D7C7] bg-[#F5EFE6] shadow-lg">
               <img
-                src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=85"
+                src={about?.image || "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=85"}
                 alt="Artisan at work in Kutch"
                 className="w-full h-full object-cover object-center"
               />

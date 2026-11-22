@@ -22,9 +22,34 @@ import {
   MessageCircle,
   Trash2,
   Plus,
-  ShieldCheck
+  ShieldCheck,
+  MapPin,
+  ExternalLink,
+  Compass
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+
+const DEFAULT_ABOUT = {
+  badge: 'ABOUT US',
+  headline: 'A Celebration of Tradition, Artistry & Timeless Elegance',
+  storyParagraph1: 'Bandhanu is a celebration of tradition, artistry, and timeless elegance. Rooted in the ancient craft of Bandhani (Bandhej), our brand brings forward the beauty of knots, patterns, and indigo hues that tell stories of heritage and culture.',
+  storyParagraph2: 'Each piece is hand-tied and hand-dyed, carrying with it the patience, skill, and soul of artisans who have preserved this art for generations. At Bandhanu, we don’t just create products—we create experiences woven with history and designed for modern living.',
+  image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=80',
+  buttonText: 'Read Our Story',
+  buttonLink: '',
+  locationCity: 'Bhadli',
+  locationState: 'Kutch, Gujarat',
+  locationTagline: 'Visit Our Heritage Atelier • Get Directions',
+  locationMapUrl: 'https://maps.app.goo.gl/86qCkie4AofH5xPQA',
+  quoteText: 'Every knot we tie is not just a design—it’s a promise of authenticity, sustainability, and love for handmade.',
+  quoteAuthor: 'Bandhanu: Every Knot, A Story.',
+  visionPillar1Title: 'Global Identity',
+  visionPillar1Desc: 'To make Bandhani a global identity.',
+  visionPillar2Title: 'Honor The Artisans',
+  visionPillar2Desc: 'To honor the craft and the artisans behind it.',
+  visionPillar3Title: 'Contemporary Designs',
+  visionPillar3Desc: 'To blend traditional techniques with contemporary designs that suit today’s world.'
+};
 
 const DEFAULT_CUSTOM_ORDER: SiteCustomOrder = {
   badge: 'Bespoke Atelier Service',
@@ -72,9 +97,14 @@ export const SiteContentCMS: React.FC = () => {
   const [newColorName, setNewColorName] = useState('');
   const [newColorHex, setNewColorHex] = useState('#9B111E');
 
+  const currentAbout = rawFormData.about || DEFAULT_ABOUT;
   const currentCustomOrder = rawFormData.customOrder || DEFAULT_CUSTOM_ORDER;
   const formData: UniversalSiteContent = {
     ...rawFormData,
+    about: {
+      ...DEFAULT_ABOUT,
+      ...currentAbout
+    },
     customOrder: {
       ...DEFAULT_CUSTOM_ORDER,
       ...currentCustomOrder,
@@ -1294,31 +1324,190 @@ export const SiteContentCMS: React.FC = () => {
         {/* TAB 3: ABOUT US & VISION PILLARS */}
         {activeTab === 'about' && (
           <div className="p-6 rounded-3xl bg-white dark:bg-heritage-darkCard border border-heritage-gold/30 shadow-md space-y-6">
-            <h3 className="font-serif font-bold text-lg text-heritage-charcoal dark:text-white border-b border-heritage-gold/20 pb-2">
-              Official Heritage Narrative & 3 Vision Pillars
-            </h3>
-
-            <div>
-              <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
-                Story Headline
-              </label>
-              <input
-                type="text"
-                value={formData.about.headline}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    about: { ...formData.about, headline: e.target.value }
-                  })
-                }
-                className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/15 dark:bg-heritage-darkSurface dark:text-white text-xs"
-              />
+            <div className="flex items-center justify-between border-b border-heritage-gold/20 pb-3">
+              <div>
+                <h3 className="font-serif font-bold text-lg text-heritage-charcoal dark:text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-heritage-crimson dark:text-heritage-gold" />
+                  <span>Homepage "About Us" / Artisan Story & Heritage</span>
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Fully customize the showcase photo, badge, headline, narrative, CTA button, and interactive workshop map card.
+                </p>
+              </div>
             </div>
 
+            {/* 1. Left Showcase Photo */}
+            <div className="space-y-3 p-4 sm:p-5 rounded-2xl bg-heritage-sand/20 dark:bg-heritage-darkSurface border border-heritage-gold/25">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-heritage-crimson dark:text-heritage-gold" />
+                  <span>Section Showcase Photo (Left Column Image)</span>
+                </label>
+                {formData.about.image && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        about: { ...formData.about, image: '' }
+                      })
+                    }
+                    className="text-[11px] text-red-500 hover:text-red-700 flex items-center gap-1 font-semibold cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Remove Photo</span>
+                  </button>
+                )}
+              </div>
+
+              {formData.about.image && (
+                <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full max-h-56 rounded-xl overflow-hidden bg-gray-100 border border-heritage-gold/30">
+                  <img
+                    src={formData.about.image}
+                    alt="Story section preview"
+                    className="w-full h-full object-cover object-center"
+                    onError={(e) => {
+                      (e.target as HTMLElement).setAttribute(
+                        'src',
+                        'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=80'
+                      );
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Media Uploader */}
+              <MediaUploader
+                folder="cms"
+                multiple={false}
+                title="Upload or Choose Story Photo"
+                onImagesSelected={(urls) => {
+                  if (urls[0]) {
+                    setFormData({
+                      ...formData,
+                      about: { ...formData.about, image: urls[0] }
+                    });
+                  }
+                }}
+              />
+
+              {/* Direct URL Input */}
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                  Or Enter Direct Image URL
+                </label>
+                <input
+                  type="text"
+                  value={formData.about.image || ''}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      about: { ...formData.about, image: e.target.value }
+                    })
+                  }
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs font-mono"
+                />
+              </div>
+
+              {/* Quick Sample Presets */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Presets:</span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      about: {
+                        ...formData.about,
+                        image:
+                          'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=80'
+                      }
+                    })
+                  }
+                  className="px-2.5 py-1 text-[11px] rounded-lg bg-heritage-sand/50 hover:bg-heritage-sand text-heritage-charcoal dark:text-gray-200 border border-heritage-gold/30 cursor-pointer"
+                >
+                  Artisan Portrait
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      about: {
+                        ...formData.about,
+                        image:
+                          'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1200&q=85'
+                      }
+                    })
+                  }
+                  className="px-2.5 py-1 text-[11px] rounded-lg bg-heritage-sand/50 hover:bg-heritage-sand text-heritage-charcoal dark:text-gray-200 border border-heritage-gold/30 cursor-pointer"
+                >
+                  Tying Knots
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      about: {
+                        ...formData.about,
+                        image:
+                          'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=85'
+                      }
+                    })
+                  }
+                  className="px-2.5 py-1 text-[11px] rounded-lg bg-heritage-sand/50 hover:bg-heritage-sand text-heritage-charcoal dark:text-gray-200 border border-heritage-gold/30 cursor-pointer"
+                >
+                  Silk Drape
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Headline & Badge */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                  Section Badge / Eyebrow
+                </label>
+                <input
+                  type="text"
+                  value={formData.about.badge || ''}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      about: { ...formData.about, badge: e.target.value }
+                    })
+                  }
+                  placeholder="ABOUT US"
+                  className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/15 dark:bg-heritage-darkSurface dark:text-white text-xs"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                  Section Headline
+                </label>
+                <input
+                  type="text"
+                  value={formData.about.headline}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      about: { ...formData.about, headline: e.target.value }
+                    })
+                  }
+                  placeholder="A Celebration of Tradition, Artistry & Timeless Elegance"
+                  className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/15 dark:bg-heritage-darkSurface dark:text-white text-xs"
+                />
+              </div>
+            </div>
+
+            {/* 3. Story Narrative Paragraphs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
-                  Paragraph 1 (Tradition & Artistry)
+                  Homepage Story Narrative (Paragraph 1)
                 </label>
                 <textarea
                   rows={4}
@@ -1335,7 +1524,7 @@ export const SiteContentCMS: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
-                  Paragraph 2 (Patience, Soul & Modern Living)
+                  About Page Narrative (Paragraph 2)
                 </label>
                 <textarea
                   rows={4}
@@ -1351,10 +1540,191 @@ export const SiteContentCMS: React.FC = () => {
               </div>
             </div>
 
-            {/* 3 Vision Pillars */}
+            {/* 4. CTA Button */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-heritage-sand/20 dark:bg-heritage-darkSurface border border-heritage-gold/25">
+              <div>
+                <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                  CTA Button Text
+                </label>
+                <input
+                  type="text"
+                  value={formData.about.buttonText || ''}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      about: { ...formData.about, buttonText: e.target.value }
+                    })
+                  }
+                  placeholder="Read Our Story"
+                  className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                  CTA Button Link (Optional URL or Route)
+                </label>
+                <input
+                  type="text"
+                  value={formData.about.buttonLink || ''}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      about: { ...formData.about, buttonLink: e.target.value }
+                    })
+                  }
+                  placeholder="Leave empty for #/about, or enter URL"
+                  className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs font-mono"
+                />
+              </div>
+            </div>
+
+            {/* 5. Right Column: Workshop & Google Maps Destination Card */}
+            <div className="p-5 rounded-2xl bg-heritage-sand/30 dark:bg-heritage-darkSurface border border-heritage-gold/35 space-y-4">
+              <div className="flex items-center justify-between border-b border-heritage-gold/20 pb-2">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-heritage-crimson dark:text-heritage-gold" />
+                  <span className="font-serif font-bold text-sm text-heritage-charcoal dark:text-white">
+                    Right Column Workshop & Google Maps Location
+                  </span>
+                </div>
+                {formData.about.locationMapUrl && (
+                  <a
+                    href={formData.about.locationMapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-semibold text-heritage-crimson dark:text-heritage-gold hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Test Google Maps Link</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                    Workshop / City Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.about.locationCity || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        about: { ...formData.about, locationCity: e.target.value }
+                      })
+                    }
+                    placeholder="Bhadli"
+                    className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                    State / Region
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.about.locationState || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        about: { ...formData.about, locationState: e.target.value }
+                      })
+                    }
+                    placeholder="Kutch, Gujarat"
+                    className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                    Invitation / Callout Text (Replaces "The Artisan Heartland")
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.about.locationTagline || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        about: { ...formData.about, locationTagline: e.target.value }
+                      })
+                    }
+                    placeholder="Visit Our Heritage Atelier • Get Directions"
+                    className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs"
+                  />
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 block">
+                    Displays below the map illustration and is clickable directly into Google Maps.
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                    Google Maps Destination URL
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.about.locationMapUrl || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        about: { ...formData.about, locationMapUrl: e.target.value }
+                      })
+                    }
+                    placeholder="https://maps.app.goo.gl/..."
+                    className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-white dark:bg-heritage-darkCard dark:text-white text-xs font-mono"
+                  />
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 block">
+                    Clicking on the map badge or invitation text opens this exact map location.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 6. Quote & Author */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                  Brand Quote (About Page)
+                </label>
+                <input
+                  type="text"
+                  value={formData.about.quoteText || ''}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      about: { ...formData.about, quoteText: e.target.value }
+                    })
+                  }
+                  className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/15 dark:bg-heritage-darkSurface dark:text-white text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-heritage-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
+                  Quote Attribution
+                </label>
+                <input
+                  type="text"
+                  value={formData.about.quoteAuthor || ''}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      about: { ...formData.about, quoteAuthor: e.target.value }
+                    })
+                  }
+                  className="w-full p-2.5 rounded-xl border border-heritage-gold/30 bg-heritage-sand/15 dark:bg-heritage-darkSurface dark:text-white text-xs"
+                />
+              </div>
+            </div>
+
+            {/* 7. 3 Vision Pillars */}
             <div className="pt-4 border-t border-heritage-gold/20 space-y-4">
-              <h4 className="font-serif font-bold text-sm text-heritage-crimson dark:text-heritage-gold">
-                The 3 Vision Pillars
+              <h4 className="font-serif font-bold text-sm text-heritage-crimson dark:text-heritage-gold flex items-center gap-1.5">
+                <Compass className="w-4 h-4" />
+                <span>The 3 Vision Pillars (About Page)</span>
               </h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

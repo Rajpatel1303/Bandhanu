@@ -162,6 +162,13 @@ export interface SiteAbout {
   headline: string;
   storyParagraph1: string;
   storyParagraph2: string;
+  image?: string;
+  buttonText?: string;
+  buttonLink?: string;
+  locationCity?: string;
+  locationState?: string;
+  locationTagline?: string;
+  locationMapUrl?: string;
   quoteText: string;
   quoteAuthor: string;
   visionPillar1Title: string;

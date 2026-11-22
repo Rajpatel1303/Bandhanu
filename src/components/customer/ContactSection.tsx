@@ -63,10 +63,10 @@ Looking forward to connecting with your master artisans!`;
             <span>Artisan Studio Concierge</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-heritage-charcoal dark:text-white">
-            Connect With Our Jamnagar Studio
+            Connect With Our Bandhanu's Studio
           </h2>
           <p className="mt-2 text-sm text-heritage-charcoal/75 dark:text-gray-300">
-            For bespoke bridal trousseau consultations, custom dye palettes, or international shipping assistance.
+            We are here to assist you with inquiries, custom creations, and styling advice.
           </p>
         </div>
 
@@ -155,10 +155,10 @@ Looking forward to connecting with your master artisans!`;
           <div className="lg:col-span-7">
             <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-heritage-darkSurface border border-heritage-gold/30 shadow-xl">
               <h3 className="font-serif font-bold text-xl text-heritage-charcoal dark:text-white mb-1">
-                Enquire for Bespoke Trousseau or Bulk Orders
+                Enquire for Bespoke Trousseau & Custom Creations
               </h3>
               <p className="text-xs text-heritage-charcoal/70 dark:text-gray-400 mb-6">
-                Fill this quick enquiry to dispatch your requirements directly to our head artisan on WhatsApp.
+                Fill this quick enquiry to connect directly with our team on WhatsApp.
               </p>
 
               {submitted ? (
@@ -223,7 +223,7 @@ Looking forward to connecting with your master artisans!`;
 
                   <div>
                     <label className="block font-semibold text-heritage-charcoal dark:text-gray-200 mb-1">
-                      Specific Requirements or Wedding Date (Optional)
+                      Specific Requirements or Message (Optional)
                     </label>
                     <textarea
                       rows={3}

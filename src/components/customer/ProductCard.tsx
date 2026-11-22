@@ -12,8 +12,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const {
     isWishlisted,
     toggleWishlist,
-    navigateToProduct,
-    addToCart
+    navigateToProduct
   } = useStore();
 
   const wishlisted = isWishlisted(product.id);

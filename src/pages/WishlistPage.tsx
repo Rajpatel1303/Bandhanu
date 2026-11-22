@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStore } from '../context/StoreContext';
-import { Heart, Trash2, ArrowRight } from 'lucide-react';
+import { Heart, Trash2, ArrowRight, MessageCircle } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 
 export const WishlistPage: React.FC = () => {
@@ -10,7 +10,8 @@ export const WishlistPage: React.FC = () => {
     toggleWishlist,
     navigateToProduct,
     setCurrentPage,
-    addToCart
+    triggerWhatsAppEnquiry,
+    triggerMultiProductEnquiry
   } = useStore();
 
   const savedProducts = products.filter((p) => wishlist.includes(p.id));
@@ -101,14 +102,14 @@ export const WishlistPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Right: Solid Maroon Add to Cart Button + Trash Icon */}
+                {/* Right: Enquire on WhatsApp Button + Trash Icon */}
                 <div className="flex items-center gap-3 sm:gap-4 shrink-0">
                   <button
-                    onClick={() => addToCart(product, 1)}
-                    className="py-2.5 px-4 sm:py-3 sm:px-6 bg-[#4A121A] hover:bg-[#380D13] text-white text-xs font-medium tracking-[0.1em] uppercase transition-all duration-300 shadow-sm flex items-center gap-1.5 cursor-pointer group"
+                    onClick={() => triggerWhatsAppEnquiry(product)}
+                    className="py-2.5 px-4 sm:py-3 sm:px-5 bg-[#25D366] hover:bg-[#20ba59] active:scale-[0.99] text-white text-xs font-semibold tracking-wide transition-all duration-300 shadow-xs flex items-center gap-1.5 cursor-pointer rounded-sm"
                   >
-                    <span>Add to Cart</span>
-                    <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                    <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                    <span>Enquire on WhatsApp</span>
                   </button>
 
                   <button
@@ -123,14 +124,24 @@ export const WishlistPage: React.FC = () => {
               </div>
             ))}
 
-            {/* Bottom Link matching Image 2 */}
-            <div className="pt-6 text-left">
+            {/* Bottom Actions: Enquire All & Continue Shopping */}
+            <div className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <button
                 onClick={handleContinueShopping}
-                className="text-xs sm:text-sm font-medium text-[#241E1C] hover:text-[#4A121A] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="text-xs sm:text-sm font-medium text-[#241E1C] hover:text-[#4A121A] inline-flex items-center gap-1.5 transition-colors cursor-pointer order-2 sm:order-1"
               >
                 <span>Continue Shopping →</span>
               </button>
+
+              {savedProducts.length > 1 && (
+                <button
+                  onClick={() => triggerMultiProductEnquiry(savedProducts)}
+                  className="py-2.5 px-5 bg-[#25D366] hover:bg-[#20ba59] active:scale-[0.99] text-white text-xs font-semibold tracking-wide transition-all duration-300 shadow-sm flex items-center justify-center gap-2 cursor-pointer rounded-sm order-1 sm:order-2"
+                >
+                  <MessageCircle className="w-4 h-4 fill-current" />
+                  <span>Enquire All ({savedProducts.length} Pieces) on WhatsApp</span>
+                </button>
+              )}
             </div>
           </div>
         )}

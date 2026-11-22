@@ -32,11 +32,23 @@ export function addToMediaLibrary(url: string): void {
   try {
     if (!url || typeof url !== 'string') return;
     const current = getMediaLibrary();
-    // Prepend and keep unique, max 60 items
-    const updated = [url, ...current.filter(u => u !== url)].slice(0, 60);
+    const isData = url.startsWith('data:');
+    const filtered = current.filter(u => u !== url);
+    // Limit base64 data URLs to prevent filling up localStorage quota
+    let updated: string[];
+    if (isData) {
+      const nonData = filtered.filter(u => !u.startsWith('data:'));
+      const recentData = filtered.filter(u => u.startsWith('data:')).slice(0, 2);
+      updated = [url, ...recentData, ...nonData].slice(0, 30);
+    } else {
+      updated = [url, ...filtered].slice(0, 40);
+    }
     localStorage.setItem(STORAGE_MEDIA_LIBRARY_KEY, JSON.stringify(updated));
   } catch (err) {
-    console.warn('Could not update media library in localStorage:', err);
+    console.warn('Could not update media library in localStorage, clearing large items:', err);
+    try {
+      localStorage.removeItem(STORAGE_MEDIA_LIBRARY_KEY);
+    } catch {}
   }
 }
 
@@ -68,10 +80,11 @@ export async function uploadMediaFile(
     message: `Compressing ${file.name} (${formatBytes(file.size)})...`
   });
 
+  const maxDim = folder === 'banners' ? 1600 : folder === 'cms' ? 1000 : 1200;
   const optimization = await optimizeImage(file, {
-    maxWidth: folder === 'banners' ? 2048 : 1600,
-    maxHeight: folder === 'banners' ? 2048 : 1600,
-    quality: 0.82,
+    maxWidth: maxDim,
+    maxHeight: maxDim,
+    quality: folder === 'cms' ? 0.78 : 0.80,
     format: 'image/webp'
   });
 

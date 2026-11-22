@@ -138,3 +138,37 @@
 .text-\[\#6E6259\] {
   color: var(--brand-muted, #6E6259) !important;
 }
+
+/* Atelier Google Maps Callout Pill Badge */
+.atelier-map-badge {
+  background-color: #FFFFFF !important;
+  border: 1px solid #D8C7B5 !important;
+  transition: all 0.3s ease !important;
+}
+
+.group:hover .atelier-map-badge,
+.atelier-map-badge:hover {
+  background-color: #4A121A !important;
+  border-color: #4A121A !important;
+  box-shadow: 0 4px 14px rgba(74, 18, 26, 0.3) !important;
+}
+
+.atelier-map-badge span {
+  color: #241E1C !important;
+  transition: color 0.3s ease !important;
+}
+
+.group:hover .atelier-map-badge span,
+.atelier-map-badge:hover span {
+  color: #FFFFFF !important;
+}
+
+.atelier-map-badge svg {
+  color: #8C1D2F !important;
+  transition: color 0.3s ease !important;
+}
+
+.group:hover .atelier-map-badge svg,
+.atelier-map-badge:hover svg {
+  color: #F3E5D0 !important;
+}

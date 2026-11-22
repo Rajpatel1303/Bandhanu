@@ -6,7 +6,7 @@ import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { QuickViewModal } from './components/common/QuickViewModal';
-import { CartDrawer } from './components/common/CartDrawer';
+
 
 // Dedicated Customer Pages (100% Public Storefront)
 import { HomePage } from './pages/HomePage';
@@ -99,7 +99,7 @@ const AppContent: React.FC = () => {
       </main>
 
       <Footer />
-      <CartDrawer />
+
       <FloatingWhatsApp />
       <QuickViewModal />
     </div>

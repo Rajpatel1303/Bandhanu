@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Search, Heart, ShoppingBag, Menu, X } from 'lucide-react';
+import { Search, Heart, Menu, X } from 'lucide-react';
 import { InstagramIcon } from './InstagramIcon';
 import { getWhatsAppDirectUrl } from '../../utils/whatsapp';
 
@@ -13,8 +13,6 @@ export const Navbar: React.FC = () => {
     searchQuery,
     setSearchQuery,
     wishlist,
-    setIsCartOpen,
-    totalCartItems,
     profile,
     siteContent,
     theme
@@ -234,19 +232,7 @@ export const Navbar: React.FC = () => {
                 )}
               </button>
 
-              {/* Shopping Bag Button with Counter */}
-              <button
-                onClick={() => setIsCartOpen(true)}
-                className="p-2 text-[#241E1C] hover:text-[#4A121A] hover:bg-[#F5EFE6] rounded-full transition-colors relative"
-                aria-label="Shopping Bag"
-              >
-                <ShoppingBag className="w-4.5 h-4.5 stroke-[1.8]" />
-                {totalCartItems > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#4A121A] text-white text-[9px] font-bold flex items-center justify-center">
-                    {totalCartItems}
-                  </span>
-                )}
-              </button>
+
             </div>
           </div>
 

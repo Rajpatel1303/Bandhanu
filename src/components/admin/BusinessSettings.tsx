@@ -204,11 +204,11 @@ export const BusinessSettings: React.FC = () => {
       type: 'WhatsApp'
     },
     {
-      id: 'cart',
-      name: 'Shopping Bag Checkout on WhatsApp',
-      location: 'Cart slide-over drawer ("Checkout via WhatsApp")',
-      icon: ShoppingBag,
-      url: getWhatsAppDirectUrl(cleanPhone, `Hello ${brand} Concierge! I would like to place an order for the items in my shopping bag.`),
+      id: 'product_order',
+      name: 'Direct Product Order on WhatsApp',
+      location: 'Product Detail & Wishlist ("Order on WhatsApp")',
+      icon: MessageCircle,
+      url: getWhatsAppDirectUrl(cleanPhone, `Hello ${brand} Concierge! I would like to order handcrafted Bandhani pieces.`),
       type: 'WhatsApp'
     },
     {
