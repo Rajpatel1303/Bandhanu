@@ -55,9 +55,9 @@ export const AboutPage: React.FC = () => {
       {/* 1. Hero Banner */}
       <section className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden bg-[#241E1C]">
         <img
-          src="https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1800&q=85"
-          alt="Hands tying Bandhani knots"
-          className="w-full h-full object-cover object-[center_40%]"
+          src="/images/our-story-hero.jpg"
+          alt="Authentic Bandhani Craft Heritage"
+          className="w-full h-full object-cover object-[center_35%]"
         />
         <div className="absolute inset-0 bg-black/55 backdrop-blur-[1px] flex items-center justify-center text-center px-4">
           <div className="max-w-2xl">
@@ -122,7 +122,7 @@ export const AboutPage: React.FC = () => {
               <img
                 src={about?.image && !about.image.includes('1544816155-12df9643f363') ? about.image : "/images/artisan-story.jpg"}
                 alt="Artisan at work in Kutch"
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-top"
               />
             </div>
           </div>

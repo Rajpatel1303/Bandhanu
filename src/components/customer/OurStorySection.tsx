@@ -56,12 +56,12 @@ export const OurStorySection: React.FC = () => {
       >
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-12 items-stretch">
           
-          {/* Left Column: Photo of Artisan Woman / Showcase */}
+          {/* Left Column: Photo of Artisan / Showcase */}
           <div className="lg:col-span-4 h-72 sm:h-96 md:h-auto min-h-[280px] relative overflow-hidden bg-[#EFE8DC]">
             <img
               src={image}
               alt={headline}
-              className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
+              className="w-full h-full object-cover object-top transition-transform duration-700 hover:scale-105"
             />
           </div>
 

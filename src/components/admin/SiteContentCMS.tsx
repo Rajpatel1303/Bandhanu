@@ -1426,6 +1426,21 @@ export const SiteContentCMS: React.FC = () => {
                   }
                   className="px-2.5 py-1 text-[11px] rounded-lg bg-heritage-sand/50 hover:bg-heritage-sand text-heritage-charcoal dark:text-gray-200 border border-heritage-gold/30 cursor-pointer"
                 >
+                  Artisan Untying Knots
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      about: {
+                        ...formData.about,
+                        image: '/images/artisan-dyeing-pink.jpg'
+                      }
+                    })
+                  }
+                  className="px-2.5 py-1 text-[11px] rounded-lg bg-heritage-sand/50 hover:bg-heritage-sand text-heritage-charcoal dark:text-gray-200 border border-heritage-gold/30 cursor-pointer"
+                >
                   Artisan Dyeing (Pink Silk)
                 </button>
                 <button
@@ -1442,21 +1457,6 @@ export const SiteContentCMS: React.FC = () => {
                   className="px-2.5 py-1 text-[11px] rounded-lg bg-heritage-sand/50 hover:bg-heritage-sand text-heritage-charcoal dark:text-gray-200 border border-heritage-gold/30 cursor-pointer"
                 >
                   Artisan at Dye Pot
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFormData({
-                      ...formData,
-                      about: {
-                        ...formData.about,
-                        image: '/images/artisan-knots.jpg'
-                      }
-                    })
-                  }
-                  className="px-2.5 py-1 text-[11px] rounded-lg bg-heritage-sand/50 hover:bg-heritage-sand text-heritage-charcoal dark:text-gray-200 border border-heritage-gold/30 cursor-pointer"
-                >
-                  Bandhej Knots Untying
                 </button>
               </div>
             </div>
